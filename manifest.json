@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "web time",
+    "description": "Notify a callback URL whenever a webpage is loaded or displayed",
+    "version": "1.0",
+    "action": {
+      "default_popup": "hello.html",
+      "default_icon": "hello_extensions.png"
+    }
+  }
