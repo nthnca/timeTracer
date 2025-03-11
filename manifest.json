@@ -4,7 +4,8 @@
     "description": "Notify a callback URL whenever a webpage is loaded or displayed",
     "version": "1.0",
     "permissions": [
-        "tabs"
+        "tabs",
+        "storage"
     ],
     "action": {
         "default_popup": "index.html",
