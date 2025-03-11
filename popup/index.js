@@ -18,11 +18,11 @@
 /* ===================================================== *\
 || Store data to local                                   ||
 \* ===================================================== */
-    function storeData(key, data) {
-        chrome.storage.local.set({ [key]: data }).then(() => {
-            console.log("Value is set");
-        });
-    }
+function storeData(key, data) {
+    chrome.storage.local.set({ [key]: data }).then(() => {
+        console.log("Value is set");
+    });
+}
 
 /* ===================================================== *\
 || Retrieve data from to local                           ||
