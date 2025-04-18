@@ -12,18 +12,27 @@
 || Store data to local                                   ||
 \* ===================================================== */
 function storeData(key, data) {
-    chrome.storage.local.set({ [key]: data }).then(() => {
-        console.log(`Key: ${key}, Value: ${data}`);
+    chrome.storage.local.set({ [key]: data }, function() {
+        if (chrome.runtime.lastError) {
+            console.error('Error saving to local storage:', chrome.runtime.lastError);
+        } else {
+            console.log(`Stored - key: ${key}, value: ${JSON.stringify(result[key])}`);
+        }
     });
 }
 
 /* ===================================================== *\
 || Retrieve data from to local                           ||
 \* ===================================================== */
-function retrieveData(key) {
-    return chrome.storage.local.get([key]).then((result) => {
-        console.log(`Key: ${key}, Value: ${result.key}`);
-    });
+async function retrieveData(key) {
+    try {
+        const result = await chrome.storage.local.get([key]);
+        console.log(`retrieve - key: ${key}, value: ${result[key]}`);
+        return result[key];
+    } catch (error) {
+        console.error("Error retrieving data:", error);
+        return undefined;
+    }
 }
 
 /* ===================================================== *\
