@@ -60,6 +60,18 @@ async function updateStoredData(activeUrl) {
     storeData(key, siteList);
 }
 
+/* ===================================================== *\
+|| search the data for a target url                      ||
+||      return index (-1 if not found)
+\* ===================================================== */
+function searchDataUrls(targetUrl, dataList) {
+    for (let i = 0; i < dataList.length; i++) {
+        if (dataList[i].url === targetUrl) {
+            return i;
+        }
+    };
+    return -1;
+}
 
 /* ===================================================== *\
 || Extract the top level domain from the URL             ||
