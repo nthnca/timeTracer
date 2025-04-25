@@ -13,10 +13,10 @@
 - [ ] 
 
 ## file layout
-- pkg/ [the final code to run the extension]
-- src/ [the tests and vanilla .js code, seperated from the chrome API code]
-- build.sh -- TODO: this will concatenate all my src files into the production extension files
-- watch.sh -- TODO: this is similer to nodemon, it will watch the src files and rebuild production on change
+- pkg/      -- The final code to run the extension
+- src/      -- The tests and vanilla .js code, seperated from the chrome API code]
+- build.sh  -- This will parse all my src files into the production script files
+- watch.sh  --  TODO: this is similar to nodemon, it will watch the src files and rebuild production on change
 
 ## Resources:
 - [Basics of Chrome Extensions](https://www.youtube.com/watch?v=Zt_6UXvoKHM)
