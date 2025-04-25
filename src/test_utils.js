@@ -11,6 +11,12 @@ cleanUrl_basicGoogleGemini();
 
 // BEGIN_IMPORT_HERE
 
+// ===================================================== \\
+// ===================================================== \\
+//                      Utilities
+// ===================================================== \\
+// ===================================================== \\
+
 /* ===================================================== *\
 || search the data for a target url                      ||
 ||      return index (-1 if not found)
@@ -61,7 +67,6 @@ function calcTimeElapsed(useStartDate) {
     console.log(currDate - useStartDate);
     return currDate - useStartDate ;
 }
-
 // END_IMPORT_HERE
 
 

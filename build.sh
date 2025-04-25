@@ -1,7 +1,7 @@
 
 set -e
 
-destinationFile="pkg/test_background.js"
+destinationFile="pkg/background.js"
 
 touch "$destinationFile"
 
