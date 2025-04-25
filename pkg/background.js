@@ -9,33 +9,6 @@
 // ===================================================== \\
 
 /* ===================================================== *\
-|| Store data to local                                   ||
-\* ===================================================== */
-function storeData(key, data) {
-    chrome.storage.local.set({ [key]: data }, function() {
-        if (chrome.runtime.lastError) {
-            console.error('Error saving to local storage:', chrome.runtime.lastError);
-        } else {
-            console.log(`Stored - key: ${key}, value: ${JSON.stringify(data)}`);
-        }
-    });
-}
-
-/* ===================================================== *\
-|| Retrieve data from to local                           ||
-\* ===================================================== */
-async function getData(key) {
-    try {
-        const result = await chrome.storage.local.get([key]);
-        console.log(`retrieve - key: ${key}, value: ${result[key]}`);
-        return result[key];
-    } catch (error) {
-        console.error("Error retrieving data:", error);
-        return undefined;
-    }
-}
-
-/* ===================================================== *\
 || search the data for a target url                      ||
 ||      return index (-1 if not found)
 \* ===================================================== */
@@ -72,6 +45,50 @@ function cleanUrl(url) {
     } catch (error) {
         console.error("Invalid URL:", url, error);
         return null;
+    }
+}
+
+/* ===================================================== *\
+|| calculates the time in milliseconds between           ||
+||      useStartDate and the current time.               ||
+||  NOTE: no tests
+\* ===================================================== */
+function calcTimeElapsed(useStartDate) {
+    let currDate = new Date();
+    console.log(currDate - useStartDate);
+    return currDate - useStartDate ;
+}
+
+// ==================================================== \\
+// ==================================================== \\
+// functions dependent on chrome API                    \\
+// ==================================================== \\
+// ==================================================== \\
+
+/* ===================================================== *\
+|| Store data to local                                   ||
+\* ===================================================== */
+function storeData(key, data) {
+    chrome.storage.local.set({ [key]: data }, function() {
+        if (chrome.runtime.lastError) {
+            console.error('Error saving to local storage:', chrome.runtime.lastError);
+        } else {
+            console.log(`Stored - key: ${key}, value: ${JSON.stringify(data)}`);
+        }
+    });
+}
+
+/* ===================================================== *\
+|| Retrieve data from to local                           ||
+\* ===================================================== */
+async function getData(key) {
+    try {
+        const result = await chrome.storage.local.get([key]);
+        console.log(`retrieve - key: ${key}, value: ${result[key]}`);
+        return result[key];
+    } catch (error) {
+        console.error("Error retrieving data:", error);
+        return undefined;
     }
 }
 
