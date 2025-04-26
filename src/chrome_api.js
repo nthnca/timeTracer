@@ -5,9 +5,15 @@
 // ==================================================== \\
 // ==================================================== \\
 
-/* ===================================================== *\
-|| Store data to local                                   ||
-\* ===================================================== */
+/**
+ * Stores data in Chrome's local storage.
+ *
+ * This function saves the provided data under the specified key in Chrome's local storage.
+ * It handles potential errors during the storage process and logs the outcome.
+ *
+ * @param {string} key - The key under which to store the data.
+ * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
+ */
 function storeData(key, data) {
     chrome.storage.local.set({ [key]: data }, function() {
         if (chrome.runtime.lastError) {
@@ -18,9 +24,15 @@ function storeData(key, data) {
     });
 }
 
-/* ===================================================== *\
-|| Retrieve data from to local                           ||
-\* ===================================================== */
+/**
+ * Retrieves data from Chrome's local storage.
+ *
+ * This asynchronous function retrieves data from Chrome's local storage using the provided key.
+ * It handles potential errors during retrieval and returns the data or undefined if an error occurs.
+ *
+ * @param {string} key - The key of the data to retrieve.
+ * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved data, or undefined if an error occurred.
+ */
 async function getData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
@@ -32,9 +44,15 @@ async function getData(key) {
     }
 }
 
-/* ===================================================== *\
-|| Update Data points in local storage                   ||
-\* ===================================================== */
+/**
+ * Updates stored data for a given URL.
+ *
+ * This asynchronous function updates the stored data in Chrome's local storage for a given URL.
+ * It retrieves the existing data, updates it, and then stores the updated data back.
+ *
+ * @param {string} activeUrl - The URL to update data for.
+ * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
+ */
 async function updateStoredData(activeUrl) {
     let key = "siteList"
     let siteList = await getData(key);
@@ -53,7 +71,7 @@ async function updateStoredData(activeUrl) {
         // data storage struc
         let newListItem = {
             url: activeUrl, // string
-            enterDate: "", // date TODO: this needs current date / time
+            startDate: "", // date TODO: this needs current date / time
             totalTime: 0,   // in hours
         }
 
@@ -67,7 +85,7 @@ async function updateStoredData(activeUrl) {
 
         // calc usage time
         let currDate = new Date();
-        let itemDate = item.enterDate;
+        let itemDate = item.startDate;
         let timeDiff = currDate.getTime() - itemDate.getTime();
         console.log(timeDiff);
     }
