@@ -9,6 +9,9 @@ cleanUrl_basicReddit();
 cleanUrl_basicGoogleMail();
 cleanUrl_basicGoogleGemini();
 
+calcTimeElapsed_basic();
+minutesFromMilliseconds_basic();
+
 // BEGIN_IMPORT_HERE
 
 // ===================================================== \\
@@ -83,15 +86,24 @@ function cleanUrl(url) {
     }
 }
 
-/* ===================================================== *\
-|| calculates the time in milliseconds between           ||
-||      useStartDate and the current time.               ||
-||  NOTE: no tests
-\* ===================================================== */
-function calcTimeElapsed(useStartDate) {
-    let currDate = new Date();
-    console.log(currDate - useStartDate);
-    return currDate - useStartDate ;
+/**
+ * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+ *
+ * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+ * @returns {number} The time elapsed in milliseconds.
+ */
+function calcTimeElapsed(startDate, endDate) {
+    return endDate - startDate;
+}
+
+/**
+ * Calculates the number of minutes from a given number of milliseconds.
+ *
+ * @param {number} milliseconds - The number of milliseconds.
+ * @returns {number} The number of minutes.
+ */
+function minutesFromMilliseconds(milliseconds) {
+  return milliseconds / (1000 * 60);
 }
 // END_IMPORT_HERE
 
@@ -127,8 +139,10 @@ function searchDataUrls_found() {
     if (index == 0) {
         // pass if the string match is found in obj at index 0
         console.log(`searchDataUrls_found ------------------------ ✔️ `);
+        return true;
     } else {
         console.log(`searchDataUrls_found ------------------------ ❗ `);
+        return false;
     }
 }
 
@@ -152,8 +166,10 @@ function searchDataUrls_notFound() {
     if (index == -1) {
         // pass if the string match is not found in list (-1 return)
         console.log(`searchDataUrls_notFound --------------------- ✔️ `);
+        return true;
     } else {
         console.log(`searchDataUrls_notFound --------------------- ❗ `);
+        return false;
     }
 }
 
@@ -172,8 +188,10 @@ function cleanUrl_basicReddit() {
     // check / test
     if (cleanedUrl == "www.reddit.com") {
         console.log(`cleanUrl_basicReddit ------------------------ ✔️ `);
+        return true;
     } else {
         console.log(`cleanUrl_basicReddit ------------------------ ❗ `);
+        return false;
     }
 }
 
@@ -188,8 +206,10 @@ function cleanUrl_basicGoogleMail() {
     // check / test
     if (cleanedUrl == "mail.google.com") {
         console.log(`cleanUrl_basicGoogleMail -------------------- ✔️ `);
+        return true;
     } else {
         console.log(`cleanUrl_basicGoogleMail -------------------- ❗ `);
+        return false;
     }
 }
 
@@ -204,14 +224,46 @@ function cleanUrl_basicGoogleGemini() {
     // check / test
     if (cleanedUrl == "gemini.google.com") {
         console.log(`cleanUrl_basicGoogleGemini ------------------ ✔️ `);
+        return true;
     } else {
         console.log(`cleanUrl_basicGoogleGemini ------------------ ❗ `);
+        return false;
     }
 }
 
-
-// ===================================================== \\
 // Calc time Elapsed tests
-// ===================================================== \\
+function calcTimeElapsed_basic() {
+    //setup
+    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:30 AM
+    const endDate = new Date(2024, 0, 7, 10, 40, 0, 0); // Example: January 7, 2024, 10:40 AM
 
-function calcTimeElapsed_() {}
+    //exercise
+    const time = calcTimeElapsed(startDate, endDate);
+
+    // check / test
+    if (time == 600000) {
+        console.log(`calcTimeElapsed_basic ----------------------- ✔️ `);
+        return true;
+    } else {
+        console.log(`calcTimeElapsed_basic ----------------------- ❗ `);
+        return false;
+    }
+}
+
+// minutes from milli-secs test
+function minutesFromMilliseconds_basic() {
+    //setup
+    let milliSecs = 600000;
+
+    //exercise
+    const time = minutesFromMilliseconds(milliSecs);
+
+    // check / test
+    if (time == 10) { // should come to 10 minutes
+        console.log(`minutesFromMilliseconds --------------------- ✔️ `);
+        return true;
+    } else {
+        console.log(`minutesFromMilliseconds --------------------- ❗ `);
+        return false;
+    }
+}
