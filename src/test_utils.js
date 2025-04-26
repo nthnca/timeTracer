@@ -1,7 +1,41 @@
 
-//
-//// RUN TESTS
-//
+// ===================================================== \\
+// ===================================================== \\
+//                    Test Helpers
+// ===================================================== \\
+// ===================================================== \\
+
+// this mute code is from: https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
+console.original = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  trace: console.trace
+};
+
+function muteConsole() {
+  console.log = function() {};
+  console.info = function() {};
+  console.warn = function() {}
+  console.error = function() {};
+  console.trace = function() {};
+}
+
+function unmuteConsole() {
+  console.log = console.original.log;
+  console.info = console.original.info;
+  console.warn = console.original.warn;
+  console.error = console.original.error;
+  console.trace = console.original.trace;
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//                   Run Tests
+// ===================================================== \\
+// ===================================================== \\
+
 searchDataUrls_found();
 searchDataUrls_notFound();
 console.log()
@@ -13,6 +47,7 @@ console.log()
 
 calcTimeElapsed_minutes();
 calcTimeElapsed_hours();
+calcTimeElapsed_doubleDate();
 console.log()
 
 minutesFromMilliseconds_basic();
@@ -98,6 +133,12 @@ function cleanUrl(url) {
  * @returns {number} The time elapsed in milliseconds.
  */
 function calcTimeElapsed(startDate, endDate) {
+    if (!(startDate instanceof Date)) {
+        console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
+        console.trace();
+        return null; // Or throw error
+    }
+
     return endDate - startDate;
 }
 
@@ -271,6 +312,31 @@ function calcTimeElapsed_hours() {
         return true;
     } else {
         console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
+        console.log(time);
+        return false;
+    }
+}
+
+// Calc time Elapsed tests
+//      test if startDate is a date obj
+//      if not trough err
+function calcTimeElapsed_doubleDate() {
+    //setup
+    const startDate = "January 7, 2024, 11:00 AM";
+    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
+
+    //exercise
+    muteConsole();
+    const time = calcTimeElapsed(startDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    // error and return null
+    if (time == null) {
+        console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
+        return true;
+    } else {
+        console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
         console.log(time);
         return false;
     }
