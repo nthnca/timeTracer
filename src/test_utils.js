@@ -48,6 +48,7 @@ console.log()
 calcTimeElapsed_minutes();
 calcTimeElapsed_hours();
 calcTimeElapsed_doubleDate();
+calcTimeElapsed_doubleDateFix();
 console.log()
 
 minutesFromMilliseconds_basic();
@@ -133,7 +134,10 @@ function cleanUrl(url) {
  * @returns {number} The time elapsed in milliseconds.
  */
 function calcTimeElapsed(startDate, endDate) {
-    if (!(startDate instanceof Date)) {
+
+    // TODO: 
+    //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
+    if (Object.prototype.toString.call(startDate) !== '[object Date]') {
         console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
         console.trace();
         return null; // Or throw error
@@ -342,6 +346,34 @@ function calcTimeElapsed_doubleDate() {
     }
 }
 
+// Calc time Elapsed tests
+//      test if startDate is a date obj
+//      if not trough err
+function calcTimeElapsed_doubleDateFix() {
+    //setup
+    let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    startDate = JSON.stringify(startDate.toISOString());
+    startDate = JSON.parse(startDate);
+    startDate = new Date(startDate);
+
+    // BUG: get this to work
+    //exercise
+    muteConsole();
+    const time = calcTimeElapsed(startDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    if (time == 0) {
+        console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
+        return true;
+    } else {
+        console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
+        console.log(time);
+        return false;
+    }
+}
+
 // minutes from milli-secs test
 function minutesFromMilliseconds_basic() {
     //setup
@@ -359,3 +391,8 @@ function minutesFromMilliseconds_basic() {
         return false;
     }
 }
+
+
+
+
+
