@@ -1,13 +1,9 @@
 
-// TODO: remove all `// DEBUG:` log statements
-
-
 // ===================================================== \\
 // ===================================================== \\
 //                      Utilities
 // ===================================================== \\
 // ===================================================== \\
-
 
 /**
  * Searches an array of data objects for a specific URL and returns its index.
@@ -75,15 +71,33 @@ function cleanUrl(url) {
     }
 }
 
-/* ===================================================== *\
-|| calculates the time in milliseconds between           ||
-||      useStartDate and the current time.               ||
-||  NOTE: no tests
-\* ===================================================== */
-function calcTimeElapsed(useStartDate) {
-    let currDate = new Date();
-    console.log(currDate - useStartDate);
-    return currDate - useStartDate ;
+/**
+ * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+ *
+ * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+ * @returns {number} The time elapsed in milliseconds.
+ */
+function calcTimeElapsed(startDate, endDate) {
+
+    // TODO: 
+    //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
+    if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+        console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
+        console.trace();
+        return null; // Or throw error
+    }
+
+    return endDate - startDate;
+}
+
+/**
+ * Calculates the number of minutes from a given number of milliseconds.
+ *
+ * @param {number} milliseconds - The number of milliseconds.
+ * @returns {number} The number of minutes.
+ */
+function minutesFromMilliseconds(milliseconds) {
+  return milliseconds / (1000 * 60);
 }
 
 // ==================================================== \\
@@ -92,11 +106,17 @@ function calcTimeElapsed(useStartDate) {
 // ==================================================== \\
 // ==================================================== \\
 
-/* ===================================================== *\
-|| Store data to local                                   ||
-\* ===================================================== */
-function storeData(key, data) {
-    chrome.storage.local.set({ [key]: data }, function() {
+/**
+ * Stores data in Chrome's local storage.
+ *
+ * This function saves the provided data under the specified key in Chrome's local storage.
+ * It handles potential errors during the storage process and logs the outcome.
+ *
+ * @param {string} key - The key under which to store the data.
+ * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
+ */
+async function storeChromeLocalData(key, data) {
+    chrome.storage.local.set({ [key]: JSON.stringify(data)}, function() {
         if (chrome.runtime.lastError) {
             console.error('Error saving to local storage:', chrome.runtime.lastError);
         } else {
@@ -105,26 +125,62 @@ function storeData(key, data) {
     });
 }
 
-/* ===================================================== *\
-|| Retrieve data from to local                           ||
-\* ===================================================== */
-async function getData(key) {
+/**
+ * Retrieves data from Chrome's local storage.
+ *
+ * This asynchronous function retrieves data from Chrome's local storage using the provided key.
+ * It handles potential errors during retrieval and returns the data or undefined if an error occurs.
+ *
+ * @param {string} key - The key of the data to retrieve.
+ * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved data, or undefined if an error occurred.
+ */
+async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         console.log(`retrieve - key: ${key}, value: ${result[key]}`);
-        return result[key];
+        return JSON.parse(result[key]);
     } catch (error) {
         console.error("Error retrieving data:", error);
         return undefined;
     }
 }
 
-/* ===================================================== *\
-|| Update Data points in local storage                   ||
-\* ===================================================== */
-async function updateStoredData(activeUrl) {
-    let key = "siteList"
-    let siteList = await getData(key);
+/**
+ * Asynchronously sets the index of the currently active URL in local storage.
+ *
+ * @async
+ * @param {number} activeUrlIndex - The index of the currently active URL to store.
+ * @returns {Promise<void>} - A Promise that resolves when the active URL index is successfully stored.
+ */
+async function setActiveUrlIndex(activeUrlIndex) {
+  let key = "activeSiteIndex";
+  storeChromeLocalData(key, activeUrlIndex);
+}
+
+/**
+ * Asynchronously retrieves the index of the currently active URL from local storage.
+ *
+ * @async
+ * @returns {Promise<number|null|undefined>} - A Promise that resolves with the stored active URL index,
+ * or null/undefined if no data is found for the key.
+ */
+async function getActiveUrlIndex() {
+  let key = "activeSiteIndex";
+  return getChromeLocalData(key);
+}
+
+/**
+ * Updates stored data for a given URL.
+ *
+ * This asynchronous function updates the stored data in Chrome's local storage for a given URL.
+ * It retrieves the existing data, updates it, and then stores the updated data back.
+ *
+ * @param {string} newActiveUrl - The URL to update data for.
+ * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
+ */
+async function updateStoredData(newActiveUrl) {
+    let key = "siteList";
+    let siteList = await getChromeLocalData(key);
 
     // create list if null
     if (!siteList) {
@@ -132,32 +188,44 @@ async function updateStoredData(activeUrl) {
     }
 
     // find urls index in list
-    let urlIndex = searchDataUrls(activeUrl, siteList);
+    let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
 
     // if not in list
-    if (urlIndex == -1) {
+    if (newUrlIndex == -1) {
 
         // data storage struc
         let newListItem = {
-            url: activeUrl, // string
-            enterDate: "", // date TODO: this needs current date / time
-            totalTime: 0,   // in hours
-        }
+            url: newActiveUrl,
+            startDate: (new Date()).toISOString(),
+            totalTime: 0,
+            isActive: true,
+        };
 
         // update list
         siteList.push(newListItem);
-        console.log(siteList);           // DEBUG:
-        storeData(key, siteList);
+        setActiveUrlIndex(siteList.length - 1);
+
     } else { // if in list
-        let item = siteList[urlIndex];
-        // TODO: handle time increment and other bits
+
+        // find prev item index
+        let prevActiveIndex = await getActiveUrlIndex();
+        let prevItem = siteList[prevActiveIndex];
 
         // calc usage time
-        let currDate = new Date();
-        let itemDate = item.enterDate;
-        let timeDiff = currDate.getTime() - itemDate.getTime();
-        console.log(timeDiff);
+        let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
+        // update values
+        prevItem.totalTime += elapsedTime;
+        prevItem.startDate = null;
+        prevItem.isActive = false;
+
+        // set new current url obj values
+        let newItem = siteList[newUrlIndex];
+        newItem.startDate = (new Date()).toISOString();
+        newItem.isActive = true;
+        setActiveUrlIndex(newUrlIndex);
     }
+
+    storeChromeLocalData(key, siteList);
 }
 
 // ===================================================== \\
@@ -180,7 +248,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
 chrome.tabs.onActivated.addListener(function(activeInfo) {
     chrome.tabs.get(activeInfo.tabId, function(tab) {
         // handle tab errors
-        if(chrome.runtime.lastError){
+        if(chrome.runtime.lastError) {
             console.error(chrome.runtime.lastError); // DEBUG:
             return;
         }
@@ -196,11 +264,11 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("All Chrome windows are now unfocused.");
-        // Your logic for when Chrome is unfocused
+        // TODO: need an exit active site / url
 
     } else {
         console.log(`Chrome window with ID ${windowId} is now focused.`);
-        // Your logic for when a Chrome window is focused
+        // TODO: enter active site / url
     }
 });
 
