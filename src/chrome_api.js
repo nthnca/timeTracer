@@ -14,8 +14,8 @@
  * @param {string} key - The key under which to store the data.
  * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
  */
-function storeData(key, data) {
-    chrome.storage.local.set({ [key]: data }, function() {
+async function storeData(key, data) {
+    chrome.storage.local.set({ [key]: JSON.stringify(data)}, function() {
         if (chrome.runtime.lastError) {
             console.error('Error saving to local storage:', chrome.runtime.lastError);
         } else {
@@ -37,7 +37,7 @@ async function getData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         console.log(`retrieve - key: ${key}, value: ${result[key]}`);
-        return result[key];
+        return JSON.parse(result[key]);
     } catch (error) {
         console.error("Error retrieving data:", error);
         return undefined;
@@ -70,25 +70,25 @@ async function updateStoredData(activeUrl) {
 
         // data storage struc
         let newListItem = {
-            url: activeUrl, // string
-            startDate: "", // date TODO: this needs current date / time
-            totalTime: 0,   // in hours
+            url: activeUrl,
+            startDate: (new Date()).toISOString(),
+            totalTime: 0,
         }
 
         // update list
         siteList.push(newListItem);
-        console.log(siteList);           // DEBUG:
-        storeData(key, siteList);
+
     } else { // if in list
         let item = siteList[urlIndex];
-        // TODO: handle time increment and other bits
 
         // calc usage time
-        let currDate = new Date();
-        let itemDate = item.startDate;
-        let timeDiff = currDate.getTime() - itemDate.getTime();
-        console.log(timeDiff);
+        let elapsedTime = calcTimeElapsed(new Date(item.startDate), new Date());
+        item.totalTime += elapsedTime;
+        console.log(`elapsedTime: ${elapsedTime}`);
     }
+
+    console.log(siteList);           // DEBUG:
+    storeData(key, siteList);
 }
 
 // ===================================================== \\
