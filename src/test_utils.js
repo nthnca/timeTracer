@@ -17,10 +17,26 @@ cleanUrl_basicGoogleGemini();
 // ===================================================== \\
 // ===================================================== \\
 
-/* ===================================================== *\
-|| search the data for a target url                      ||
-||      return index (-1 if not found)
-\* ===================================================== */
+/**
+ * Searches an array of data objects for a specific URL and returns its index.
+ *
+ * This function iterates through an array of data objects, comparing the 'url' property of each
+ * object to the provided target URL.  It returns the index of the first object where the URLs match.
+ *
+ * @param {string} targetUrl - The URL to search for.
+ * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url' property (string).
+ * @returns {number} The index of the object with the matching URL, or -1 if no match is found.
+ *
+ * @example
+ * const data = [{ url: 'a' }, { url: 'b' }, { url: 'c' }];
+ * // Returns 1
+ * searchDataUrls('b', data);
+ *
+ * @example
+ * const data = [{ url: 'a' }, { url: 'b' }, { url: 'c' }];
+ * // Returns -1
+ * searchDataUrls('d', data);
+ */
 function searchDataUrls(targetUrl, dataList) {
     for (let i = 0; i < dataList.length; i++) {
         if (dataList[i].url === targetUrl) {
@@ -30,9 +46,19 @@ function searchDataUrls(targetUrl, dataList) {
     return -1;
 }
 
-/* ===================================================== *\
-|| Extract the top level domain from the URL             ||
-\* ===================================================== */
+/**
+ * Cleans and simplifies a URL string.
+ *
+ * This function takes a URL string, removes any path, query parameters, or hash fragments,
+ * and optionally removes the "https://" protocol. It returns the cleaned URL origin.
+ *
+ * @param {string} url - The URL string to clean.
+ * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or null if the URL is invalid or empty.
+ *
+ * @example
+ * // Returns "example.com"
+ * cleanUrl("https://example.com/path/to/resource?query=string#hash");
+ */
 // TODO: maybe change this function name??
 function cleanUrl(url) {
     if (!url) {
