@@ -4,12 +4,17 @@
 //
 searchDataUrls_found();
 searchDataUrls_notFound();
+console.log()
 
 cleanUrl_basicReddit();
 cleanUrl_basicGoogleMail();
 cleanUrl_basicGoogleGemini();
+console.log()
 
-calcTimeElapsed_basic();
+calcTimeElapsed_minutes();
+calcTimeElapsed_hours();
+console.log()
+
 minutesFromMilliseconds_basic();
 
 // BEGIN_IMPORT_HERE
@@ -232,7 +237,7 @@ function cleanUrl_basicGoogleGemini() {
 }
 
 // Calc time Elapsed tests
-function calcTimeElapsed_basic() {
+function calcTimeElapsed_minutes() {
     //setup
     const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:30 AM
     const endDate = new Date(2024, 0, 7, 10, 40, 0, 0); // Example: January 7, 2024, 10:40 AM
@@ -242,10 +247,31 @@ function calcTimeElapsed_basic() {
 
     // check / test
     if (time == 600000) {
-        console.log(`calcTimeElapsed_basic ----------------------- ✔️ `);
+        console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
         return true;
     } else {
-        console.log(`calcTimeElapsed_basic ----------------------- ❗ `);
+        console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
+        return false;
+    }
+}
+
+// Calc time Elapsed tests
+function calcTimeElapsed_hours() {
+    //setup
+    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
+
+    //exercise
+    const time = calcTimeElapsed(startDate, endDate);
+
+    // check / test
+    // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
+    if (time == 3600000) {
+        console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
+        return true;
+    } else {
+        console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
+        console.log(time);
         return false;
     }
 }
