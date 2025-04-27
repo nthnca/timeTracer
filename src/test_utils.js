@@ -30,28 +30,55 @@ function unmuteConsole() {
   console.trace = console.original.trace;
 }
 
+// this is a mock of the real function that uses the chrome API
+async function setActiveUrlIndex(index) {
+    index; // silence unused var warning
+}
+
+// this is a mock of the real function that uses the chrome API
+async function getActiveUrlIndex() {
+    return 0;
+}
+
 // ===================================================== \\
 // ===================================================== \\
 //                   Run Tests
 // ===================================================== \\
 // ===================================================== \\
 
-searchDataUrls_found();
-searchDataUrls_notFound();
-console.log()
+async function runAllTests() {
+    let testCount = 12;
+    let passRate = 0;
+    console.log("\n------ ---- ---- ---- utils ---- ---- ---- ------")
 
-cleanUrl_basicReddit();
-cleanUrl_basicGoogleMail();
-cleanUrl_basicGoogleGemini();
-console.log()
+    passRate += searchDataUrls_found();
+    passRate += searchDataUrls_notFound();
+    console.log();
 
-calcTimeElapsed_minutes();
-calcTimeElapsed_hours();
-calcTimeElapsed_doubleDate();
-calcTimeElapsed_doubleDateFix();
-console.log()
+    passRate += cleanUrl_basicReddit();
+    passRate += cleanUrl_basicGoogleMail();
+    passRate += cleanUrl_basicGoogleGemini();
+    console.log();
 
-minutesFromMilliseconds_basic();
+    passRate += calcTimeElapsed_minutes();
+    passRate += calcTimeElapsed_hours();
+    passRate += calcTimeElapsed_doubleDate();
+    passRate += calcTimeElapsed_doubleDateFix();
+    console.log()
+
+    passRate += minutesFromMilliseconds_basic();
+    console.log();
+
+    passRate += await endAndRecordSession_basic();
+    console.log();
+
+    passRate += await startTrackingSession_basic();
+    console.log();
+
+    console.log(`Utils - Total Pass Rate --------------------- ${passRate}/${testCount} `)
+}
+
+runAllTests();
 
 // BEGIN_IMPORT_HERE
 
@@ -135,7 +162,7 @@ function cleanUrl(url) {
  */
 function calcTimeElapsed(startDate, endDate) {
 
-    // TODO: 
+    // TODO: the line below this might be better then the current one
     //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
     if (Object.prototype.toString.call(startDate) !== '[object Date]') {
         console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
@@ -155,6 +182,61 @@ function calcTimeElapsed(startDate, endDate) {
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
 }
+
+/**
+ * Asynchronously starts a new tracking session for a website.
+ * It updates the 'startDate' and 'isActive' properties of the website
+ * at the given index in the site list and sets this index as the active site.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects being tracked.
+ * Each object is expected to have properties like 'url', 'startDate', 'isActive', and 'totalTime'.
+ * @param {number} newUrlIndex - The index in the siteList of the website to start tracking.
+ * @returns {Promise<void>} - A Promise that resolves when the session is started and the active index is set.
+ */
+async function startTrackingSession(siteList, newUrlIndex) {
+    let newItem = siteList[newUrlIndex];
+    if (newUrlIndex == -1) {
+        console.log(`URL "${nextActiveUrl}" not found in site list.`);
+        // TODO: this needs to handel a -1 (url not found in siteList)
+        // TODO: write a test for this path
+    }
+
+    // log error if (startDate, isActive) are not (null, false)
+    if (newItem.startDate || newItem.isActive) {
+        // TODO: write a test for this path
+        console.error("Error: startDate should never be true on enter ", newItem);
+    }
+
+    // set new values
+    newItem.startDate = (new Date()).toISOString();
+    newItem.isActive = true;
+    setActiveUrlIndex(newUrlIndex);
+}
+
+/**
+ * Asynchronously ends the currently active tracking session and records the usage time.
+ * It retrieves the index of the previously active website, calculates the time elapsed
+ * since its 'startDate', updates its 'totalTime', and resets its 'startDate' and 'isActive' properties.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects being tracked.
+ * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
+ * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
+ */
+async function endAndRecordSession(siteList) {
+    // find prev item index
+    let prevActiveIndex = await getActiveUrlIndex();
+    let prevItem = siteList[prevActiveIndex];
+
+    // calc usage time
+    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
+    // update values
+    prevItem.totalTime += elapsedTime;
+    prevItem.startDate = null;
+    prevItem.isActive = false;
+}
+
 // END_IMPORT_HERE
 
 
@@ -189,10 +271,10 @@ function searchDataUrls_found() {
     if (index == 0) {
         // pass if the string match is found in obj at index 0
         console.log(`searchDataUrls_found ------------------------ ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`searchDataUrls_found ------------------------ ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -216,10 +298,10 @@ function searchDataUrls_notFound() {
     if (index == -1) {
         // pass if the string match is not found in list (-1 return)
         console.log(`searchDataUrls_notFound --------------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`searchDataUrls_notFound --------------------- ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -238,10 +320,10 @@ function cleanUrl_basicReddit() {
     // check / test
     if (cleanedUrl == "www.reddit.com") {
         console.log(`cleanUrl_basicReddit ------------------------ ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`cleanUrl_basicReddit ------------------------ ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -256,10 +338,10 @@ function cleanUrl_basicGoogleMail() {
     // check / test
     if (cleanedUrl == "mail.google.com") {
         console.log(`cleanUrl_basicGoogleMail -------------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`cleanUrl_basicGoogleMail -------------------- ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -274,10 +356,10 @@ function cleanUrl_basicGoogleGemini() {
     // check / test
     if (cleanedUrl == "gemini.google.com") {
         console.log(`cleanUrl_basicGoogleGemini ------------------ ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`cleanUrl_basicGoogleGemini ------------------ ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -293,10 +375,10 @@ function calcTimeElapsed_minutes() {
     // check / test
     if (time == 600000) {
         console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
-        return false;
+        return 0;
     }
 }
 
@@ -313,11 +395,11 @@ function calcTimeElapsed_hours() {
     // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
     if (time == 3600000) {
         console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
         console.log(time);
-        return false;
+        return 0;
     }
 }
 
@@ -338,11 +420,11 @@ function calcTimeElapsed_doubleDate() {
     // error and return null
     if (time == null) {
         console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
         console.log(time);
-        return false;
+        return 0;
     }
 }
 
@@ -366,11 +448,11 @@ function calcTimeElapsed_doubleDateFix() {
     // check / test
     if (time == 0) {
         console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
         console.log(time);
-        return false;
+        return 0;
     }
 }
 
@@ -385,10 +467,10 @@ function minutesFromMilliseconds_basic() {
     // check / test
     if (time == 10) { // should come to 10 minutes
         console.log(`minutesFromMilliseconds --------------------- ✔️ `);
-        return true;
+        return 1;
     } else {
         console.log(`minutesFromMilliseconds --------------------- ❗ `);
-        return false;
+        return 0;
     }
 }
 
