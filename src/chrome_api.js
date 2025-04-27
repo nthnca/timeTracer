@@ -45,6 +45,31 @@ async function getChromeLocalData(key) {
 }
 
 /**
+ * Asynchronously retrieves the list of tracked websites from Chrome's local storage.
+ *
+ * @async
+ * @returns {Promise<Array<object>|null|undefined>} - A Promise that resolves with the stored array of website objects,
+ * or null/undefined if no data is found for the specified key. Each website object
+ * is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ */
+async function getSiteList() {
+  let key = "siteList";
+  return getChromeLocalData(key);
+}
+
+/**
+ * Asynchronously stores the provided list of tracked websites in Chrome's local storage.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects to store.
+ * Each website object is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ * @returns {Promise<void>} - A Promise that resolves when the site list is successfully stored.
+ */
+async function setSiteList(siteList) {
+  let key = "siteList";
+  storeChromeLocalData(key, siteList);
+}
+/**
  * Asynchronously sets the index of the currently active URL in local storage.
  *
  * @async
