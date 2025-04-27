@@ -10,6 +10,7 @@
     - [ ] `background.js` sends error: imports are only allowed in module
     - [ ] save to and from local storage are duplicated.... (background.js, popup/index.js)
 - [ ] add a way to flag URLs to remind people that they don't want to spend more time on that site
+- [ ] create a usr object in local storage to store users settings
 
 ## file layout
 - pkg/      -- The final code to run the extension
