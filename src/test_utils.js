@@ -392,7 +392,92 @@ function minutesFromMilliseconds_basic() {
     }
 }
 
+// test_endAndRecordSession_basic
+async function endAndRecordSession_basic() {
+    // setup
+    let testList = [
+        { // this is the active url
+            url: "google.com",
+            startDate: new Date(2024, 0, 7, 11, 0, 0, 0),   // Example: January 7, 2024, 11:00 AM
+            totalTime: 10, // in ms
+            isActive: true,
+        },
+        {
+            url: "reddit.com",
+            startDate: null,
+            totalTime: 0, // in ms
+            isActive: false,
+        }
+    ]
 
+    // exercise
+    await endAndRecordSession(testList);
 
+    // check / test
+    let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function in endAndRecordSession
+    let url = testList[updatedItemIndex].url;
+    let startDate = testList[updatedItemIndex].startDate;
+    let totalTime = testList[updatedItemIndex].totalTime;
+    let isActive = testList[updatedItemIndex].isActive;
+    let timeElapsed = calcTimeElapsed(new Date(2024, 0, 7, 11, 0, 0, 0), new Date()); // new Date is used in endAndRecSess
+    const tolerance = 100; // the new Date in the test is made slightly earlier then in the function being tested
 
+    if (
+        url === "google.com"
+            && !isActive
+            && startDate == null
+            && Math.abs(totalTime - timeElapsed) <= tolerance
+    ) {
+        console.log(`endAndRecordSession_basic ------------------- ✔️ `);
+        return 1;
+    } else {
+        console.log(`endAndRecordSession_basic --------------------❗ `);
+        console.log(`url:        ${url} == google.com = ${url === "google.com"}`)
+        console.log(`isActive:   ${isActive} == false = ${!isActive}`)
+        console.log(`startDate:  ${startDate} == null = ${startDate == null}`)
+        console.log(`total Time: ${totalTime} == ${timeElapsed} = ${Math.abs(totalTime - timeElapsed) <= tolerance}`)
+        return 0;
+    }
+}
 
+// test startTrackingSession basic
+async function startTrackingSession_basic() {
+
+    // setup
+    let testList = [
+        { // this is the active url
+            url: "google.com",
+            startDate: null,
+            totalTime: 10, // in ms
+            isActive: false,
+        },
+        {
+            url: "reddit.com",
+            startDate: null,
+            totalTime: 0, // in ms
+            isActive: false,
+        }
+    ]
+
+    // exercise
+    await startTrackingSession(testList, 0);
+
+    // check / test
+    let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function used in endAndRecordSession
+    let url = testList[updatedItemIndex].url;
+    //let startDate = testList[updatedItemIndex].startDate; // not tested due to date obj use
+    let totalTime = testList[updatedItemIndex].totalTime;
+    let isActive = testList[updatedItemIndex].isActive;
+
+    if (
+        url === "google.com"
+            && isActive
+            && totalTime == 10
+    ) {
+        console.log(`startTrackingSession_basic ------------------ ✔️ `);
+        return 1;
+    } else {
+        console.log(`startTrackingSession_basic ------------------ ❗ `);
+        return 0;
+    }
+}
