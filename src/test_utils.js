@@ -185,8 +185,10 @@ function minutesFromMilliseconds(milliseconds) {
 
 /**
  * Asynchronously starts a new tracking session for a website.
- * It updates the 'startDate' and 'isActive' properties of the website
- * at the given index in the site list and sets this index as the active site.
+ * It updates the 'startDate' to the current timestamp in ISO 8601 format
+ * and sets 'isActive' to true for the website object at the given index
+ * in the site list. It also sets this index as the currently active site.
+ * Logs an error if 'startDate' or 'isActive' are already truthy before starting.
  *
  * @async
  * @param {Array<object>} siteList - An array of website objects being tracked.
@@ -196,11 +198,6 @@ function minutesFromMilliseconds(milliseconds) {
  */
 async function startTrackingSession(siteList, newUrlIndex) {
     let newItem = siteList[newUrlIndex];
-    if (newUrlIndex == -1) {
-        console.log(`URL "${nextActiveUrl}" not found in site list.`);
-        // TODO: this needs to handel a -1 (url not found in siteList)
-        // TODO: write a test for this path
-    }
 
     // log error if (startDate, isActive) are not (null, false)
     if (newItem.startDate || newItem.isActive) {
@@ -215,18 +212,19 @@ async function startTrackingSession(siteList, newUrlIndex) {
 }
 
 /**
- * Asynchronously ends the currently active tracking session and records the usage time.
- * It retrieves the index of the previously active website, calculates the time elapsed
- * since its 'startDate', updates its 'totalTime', and resets its 'startDate' and 'isActive' properties.
+ * Asynchronously ends the tracking session for a previously active website and records the usage time.
+ * It retrieves the website object at the provided 'prevActiveIndex', calculates the time
+ * elapsed since its 'startDate', adds this time to its 'totalTime', and then resets
+ * its 'startDate' to null and 'isActive' to false.
  *
  * @async
  * @param {Array<object>} siteList - An array of website objects being tracked.
  * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
+ * @param {number} prevActiveIndex - The index in the siteList of the website whose session is ending.
  * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
  */
-async function endAndRecordSession(siteList) {
-    // find prev item index
-    let prevActiveIndex = await getActiveUrlIndex();
+async function endAndRecordSession(siteList, prevActiveIndex) {
+    // find prev item
     let prevItem = siteList[prevActiveIndex];
 
     // calc usage time
@@ -493,7 +491,7 @@ async function endAndRecordSession_basic() {
     ]
 
     // exercise
-    await endAndRecordSession(testList);
+    await endAndRecordSession(testList, 0);
 
     // check / test
     let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function in endAndRecordSession
