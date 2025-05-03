@@ -88,6 +88,14 @@ runAllTests();
 // ===================================================== \\
 // ===================================================== \\
 
+function createTrackingObj(currentDate = new Date()) {
+    return {
+        activeUrl: "",
+        activeUrlStartDate: currentDate,
+        urlList: [] // list of {url: "google.com", totalTime: 1000 /* ms */}
+    }
+}
+
 /**
  * Searches an array of data objects for a specific URL and returns its index.
  *
@@ -185,18 +193,21 @@ function minutesFromMilliseconds(milliseconds) {
 
 /**
  * Asynchronously starts a new tracking session for a website.
- * It updates the 'startDate' to the current timestamp in ISO 8601 format
- * and sets 'isActive' to true for the website object at the given index
- * in the site list. It also sets this index as the currently active site.
+ * It updates the 'startDate' to the ISO 8601 format of the provided 'currentTime'
+ * (or the current timestamp if no 'currentTime' is provided) and sets 'isActive'
+ * to true for the website object at the given index in the site list.
+ * It also sets this index as the currently active site.
  * Logs an error if 'startDate' or 'isActive' are already truthy before starting.
  *
  * @async
  * @param {Array<object>} siteList - An array of website objects being tracked.
  * Each object is expected to have properties like 'url', 'startDate', 'isActive', and 'totalTime'.
  * @param {number} newUrlIndex - The index in the siteList of the website to start tracking.
+ * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
+ * Defaults to the current timestamp if not provided, allowing for easier testing.
  * @returns {Promise<void>} - A Promise that resolves when the session is started and the active index is set.
  */
-async function startTrackingSession(siteList, newUrlIndex) {
+async function startTrackingSession(siteList, newUrlIndex, currentTime = new Date()) {
     let newItem = siteList[newUrlIndex];
 
     // log error if (startDate, isActive) are not (null, false)
@@ -206,7 +217,7 @@ async function startTrackingSession(siteList, newUrlIndex) {
     }
 
     // set new values
-    newItem.startDate = (new Date()).toISOString();
+    newItem.startDate = currentTime.toISOString();
     newItem.isActive = true;
     setActiveUrlIndex(newUrlIndex);
 }
@@ -214,21 +225,24 @@ async function startTrackingSession(siteList, newUrlIndex) {
 /**
  * Asynchronously ends the tracking session for a previously active website and records the usage time.
  * It retrieves the website object at the provided 'prevActiveIndex', calculates the time
- * elapsed since its 'startDate', adds this time to its 'totalTime', and then resets
- * its 'startDate' to null and 'isActive' to false.
+ * elapsed between its 'startDate' and the provided 'currentTime' (or the current
+ * timestamp if no 'currentTime' is provided), adds this elapsed time to its 'totalTime',
+ * and then resets its 'startDate' to null and 'isActive' to false.
  *
  * @async
  * @param {Array<object>} siteList - An array of website objects being tracked.
  * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
  * @param {number} prevActiveIndex - The index in the siteList of the website whose session is ending.
+ * @param {Date} [currentTime=new Date()] - An optional Date object representing the ending time.
+ * Defaults to the current timestamp if not provided, allowing for easier testing.
  * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
  */
-async function endAndRecordSession(siteList, prevActiveIndex) {
+async function endAndRecordSession(siteList, prevActiveIndex, currentTime = new Date()) {
     // find prev item
     let prevItem = siteList[prevActiveIndex];
 
     // calc usage time
-    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
+    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), currentTime);
     // update values
     prevItem.totalTime += elapsedTime;
     prevItem.startDate = null;
@@ -491,7 +505,7 @@ async function endAndRecordSession_basic() {
     ]
 
     // exercise
-    await endAndRecordSession(testList, 0);
+    await endAndRecordSession(testList, 0, new Date(2024, 0, 7, 11, 10, 0, 0));
 
     // check / test
     let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function in endAndRecordSession
@@ -499,14 +513,12 @@ async function endAndRecordSession_basic() {
     let startDate = testList[updatedItemIndex].startDate;
     let totalTime = testList[updatedItemIndex].totalTime;
     let isActive = testList[updatedItemIndex].isActive;
-    let timeElapsed = calcTimeElapsed(new Date(2024, 0, 7, 11, 0, 0, 0), new Date()); // new Date is used in endAndRecSess
-    const tolerance = 100; // the new Date in the test is made slightly earlier then in the function being tested
 
     if (
         url === "google.com"
             && !isActive
             && startDate == null
-            && Math.abs(totalTime - timeElapsed) <= tolerance
+            && totalTime === 600010 // should be 600,000 ms
     ) {
         console.log(`endAndRecordSession_basic ------------------- ✔️ `);
         return 1;
@@ -515,7 +527,7 @@ async function endAndRecordSession_basic() {
         console.log(`url:        ${url} == google.com = ${url === "google.com"}`)
         console.log(`isActive:   ${isActive} == false = ${!isActive}`)
         console.log(`startDate:  ${startDate} == null = ${startDate == null}`)
-        console.log(`total Time: ${totalTime} == ${timeElapsed} = ${Math.abs(totalTime - timeElapsed) <= tolerance}`)
+        console.log(`total Time: ${totalTime} == 600010 = ${600010}`)
         return 0;
     }
 }
@@ -539,13 +551,15 @@ async function startTrackingSession_basic() {
         }
     ]
 
+    let currentDate = new Date(2024, 0, 7, 11, 10, 0, 0); // Example: January 7, 2024, 11:10 AM
+
     // exercise
-    await startTrackingSession(testList, 0);
+    await startTrackingSession(testList, 0, currentDate);
 
     // check / test
     let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function used in endAndRecordSession
     let url = testList[updatedItemIndex].url;
-    //let startDate = testList[updatedItemIndex].startDate; // not tested due to date obj use
+    let startDate = testList[updatedItemIndex].startDate; // not tested due to date obj use
     let totalTime = testList[updatedItemIndex].totalTime;
     let isActive = testList[updatedItemIndex].isActive;
 
@@ -553,11 +567,15 @@ async function startTrackingSession_basic() {
         url === "google.com"
             && isActive
             && totalTime == 10
+            && startDate === currentDate.toISOString()
     ) {
         console.log(`startTrackingSession_basic ------------------ ✔️ `);
         return 1;
     } else {
         console.log(`startTrackingSession_basic ------------------ ❗ `);
+        console.log(`url:        ${url} == google.com = ${url === "google.com"}`)
+        console.log(`isActive:   ${isActive} == false = ${!isActive}`)
+        console.log(`startDate:  ${startDate} == ${currentDate.toISOString()} = ${startDate == null}`)
         return 0;
     }
 }
