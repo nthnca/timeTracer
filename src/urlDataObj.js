@@ -222,6 +222,8 @@ async function runAllTests() {
     testCount += 2;
     console.log();
 
+    // TODO: add a test to ensure that the totalTime += works right
+    // TODO: add a test to ensure that the if item not exists errors right
     passRate += test_endSession_basic();
     testCount += 1;
     console.log();
@@ -351,7 +353,10 @@ function test_startSession_existingSession() {
     }
 }
 
-// test if end sesstion sets all the right values
+// test that endAndRecordSession sets:
+//      activeItem.totalTime =+ elpsed time
+//      this.activeUrl = null;
+//      this.startTime = null;
 function test_endSession_basic() {
     // Setup
     const trackerObj = new UrlDataObj();
