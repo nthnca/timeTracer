@@ -101,55 +101,50 @@ async function getActiveUrlIndex() {
  *
  * @param {string} newActiveUrl - The URL to update data for.
  * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
+ * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
  */
-async function updateStoredData(newActiveUrl) {
+// TODO: change name to update activeUrlSession?
+async function updateStoredData(newActiveUrl, stopTracking, currentTime = new Date()) {
     let key = "siteList";
-    let siteList = await getChromeLocalData(key);
+    let siteList = await getChromeLocalData(key); // TODO: swap this to getSiteList
+    
 
     // create list if null
+    // TODO: add a log here to track this
     if (!siteList) {
         siteList = [];
     }
 
-    // find urls index in list
-    let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
+    // exit session
+    if (stopTracking) {
+        //let activeUrlIndex = searchDataUrls(activeUrl??, siteList);
+        endAndRecordSession(siteList, activeUrlIndex);
 
-    // if not in list
-    if (newUrlIndex == -1) {
+    } else { // start new session / update url of active session
+        // find urls index in list
+        let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
 
-        // data storage struc
-        let newListItem = {
-            url: newActiveUrl,
-            startDate: (new Date()).toISOString(),
-            totalTime: 0,
-            isActive: true,
-        };
+        // if not in list
+        if (newUrlIndex == -1) {
+            // data storage struc
+            let newListItem = {
+                url: newActiveUrl,
+                startDate: currentTime.toISOString(),
+                totalTime: 0,
+                isActive: true,
+            };
 
-        // update list
-        siteList.push(newListItem);
-        setActiveUrlIndex(siteList.length - 1);
+            // update list
+            siteList.push(newListItem);
+            setActiveUrlIndex(siteList.length - 1);
 
-    } else { // if in list
-
-        // find prev item index
-        let prevActiveIndex = await getActiveUrlIndex();
-        let prevItem = siteList[prevActiveIndex];
-
-        // calc usage time
-        let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
-        // update values
-        prevItem.totalTime += elapsedTime;
-        prevItem.startDate = null;
-        prevItem.isActive = false;
-
-        // set new current url obj values
-        let newItem = siteList[newUrlIndex];
-        newItem.startDate = (new Date()).toISOString();
-        newItem.isActive = true;
-        setActiveUrlIndex(newUrlIndex);
+        } else { // if in list
+            endAndRecordSession(siteList, await getActiveUrlIndex());
+            startTrackingSession(siteList, newUrlIndex);
+        }
     }
 
-    storeChromeLocalData(key, siteList);
+    storeChromeLocalData(key, siteList); // TODO: change this to setSiteList
 }
 
 // ===================================================== \\
@@ -163,7 +158,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("URL changed: " + activeUrl); // DEBUG:
     }
 });
@@ -179,7 +174,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
@@ -189,6 +184,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("All Chrome windows are now unfocused.");
         // TODO: need an exit active site / url
+        //updateStoredData(activeUrl, true);
 
     } else {
         console.log(`Chrome window with ID ${windowId} is now focused.`);

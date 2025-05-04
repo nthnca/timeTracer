@@ -79,7 +79,7 @@ function cleanUrl(url) {
  */
 function calcTimeElapsed(startDate, endDate) {
 
-    // TODO: 
+    // TODO: the line below this might be better then the current one
     //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
     if (Object.prototype.toString.call(startDate) !== '[object Date]') {
         console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
@@ -99,6 +99,59 @@ function calcTimeElapsed(startDate, endDate) {
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
 }
+
+/**
+ * Asynchronously starts a new tracking session for a website.
+ * It updates the 'startDate' to the current timestamp in ISO 8601 format
+ * and sets 'isActive' to true for the website object at the given index
+ * in the site list. It also sets this index as the currently active site.
+ * Logs an error if 'startDate' or 'isActive' are already truthy before starting.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects being tracked.
+ * Each object is expected to have properties like 'url', 'startDate', 'isActive', and 'totalTime'.
+ * @param {number} newUrlIndex - The index in the siteList of the website to start tracking.
+ * @returns {Promise<void>} - A Promise that resolves when the session is started and the active index is set.
+ */
+async function startTrackingSession(siteList, newUrlIndex) {
+    let newItem = siteList[newUrlIndex];
+
+    // log error if (startDate, isActive) are not (null, false)
+    if (newItem.startDate || newItem.isActive) {
+        // TODO: write a test for this path
+        console.error("Error: startDate should never be true on enter ", newItem);
+    }
+
+    // set new values
+    newItem.startDate = (new Date()).toISOString();
+    newItem.isActive = true;
+    setActiveUrlIndex(newUrlIndex);
+}
+
+/**
+ * Asynchronously ends the tracking session for a previously active website and records the usage time.
+ * It retrieves the website object at the provided 'prevActiveIndex', calculates the time
+ * elapsed since its 'startDate', adds this time to its 'totalTime', and then resets
+ * its 'startDate' to null and 'isActive' to false.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects being tracked.
+ * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
+ * @param {number} prevActiveIndex - The index in the siteList of the website whose session is ending.
+ * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
+ */
+async function endAndRecordSession(siteList, prevActiveIndex) {
+    // find prev item
+    let prevItem = siteList[prevActiveIndex];
+
+    // calc usage time
+    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
+    // update values
+    prevItem.totalTime += elapsedTime;
+    prevItem.startDate = null;
+    prevItem.isActive = false;
+}
+
 
 // ==================================================== \\
 // ==================================================== \\
@@ -146,6 +199,31 @@ async function getChromeLocalData(key) {
 }
 
 /**
+ * Asynchronously retrieves the list of tracked websites from Chrome's local storage.
+ *
+ * @async
+ * @returns {Promise<Array<object>|null|undefined>} - A Promise that resolves with the stored array of website objects,
+ * or null/undefined if no data is found for the specified key. Each website object
+ * is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ */
+async function getSiteList() {
+  let key = "siteList";
+  return getChromeLocalData(key);
+}
+
+/**
+ * Asynchronously stores the provided list of tracked websites in Chrome's local storage.
+ *
+ * @async
+ * @param {Array<object>} siteList - An array of website objects to store.
+ * Each website object is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ * @returns {Promise<void>} - A Promise that resolves when the site list is successfully stored.
+ */
+async function setSiteList(siteList) {
+  let key = "siteList";
+  storeChromeLocalData(key, siteList);
+}
+/**
  * Asynchronously sets the index of the currently active URL in local storage.
  *
  * @async
@@ -178,54 +256,47 @@ async function getActiveUrlIndex() {
  * @param {string} newActiveUrl - The URL to update data for.
  * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
  */
-async function updateStoredData(newActiveUrl) {
+// TODO: change name to update activeUrlSession?
+async function updateStoredData(newActiveUrl, stopTracking) {
     let key = "siteList";
-    let siteList = await getChromeLocalData(key);
+    let siteList = await getChromeLocalData(key); // TODO: swap this to getSiteList
 
     // create list if null
+    // TODO: add a log here to track this
     if (!siteList) {
         siteList = [];
     }
 
-    // find urls index in list
-    let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
+    // exit session
+    if (stopTracking) {
+        //let activeUrlIndex = searchDataUrls(activeUrl??, siteList);
+        endAndRecordSession(siteList, activeUrlIndex);
 
-    // if not in list
-    if (newUrlIndex == -1) {
+    } else { // start new session / update url of active session
+        // find urls index in list
+        let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
 
-        // data storage struc
-        let newListItem = {
-            url: newActiveUrl,
-            startDate: (new Date()).toISOString(),
-            totalTime: 0,
-            isActive: true,
-        };
+        // if not in list
+        if (newUrlIndex == -1) {
+            // data storage struc
+            let newListItem = {
+                url: newActiveUrl,
+                startDate: (new Date()).toISOString(),
+                totalTime: 0,
+                isActive: true,
+            };
 
-        // update list
-        siteList.push(newListItem);
-        setActiveUrlIndex(siteList.length - 1);
+            // update list
+            siteList.push(newListItem);
+            setActiveUrlIndex(siteList.length - 1);
 
-    } else { // if in list
-
-        // find prev item index
-        let prevActiveIndex = await getActiveUrlIndex();
-        let prevItem = siteList[prevActiveIndex];
-
-        // calc usage time
-        let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
-        // update values
-        prevItem.totalTime += elapsedTime;
-        prevItem.startDate = null;
-        prevItem.isActive = false;
-
-        // set new current url obj values
-        let newItem = siteList[newUrlIndex];
-        newItem.startDate = (new Date()).toISOString();
-        newItem.isActive = true;
-        setActiveUrlIndex(newUrlIndex);
+        } else { // if in list
+            endAndRecordSession(siteList, await getActiveUrlIndex());
+            startTrackingSession(siteList, newUrlIndex);
+        }
     }
 
-    storeChromeLocalData(key, siteList);
+    storeChromeLocalData(key, siteList); // TODO: change this to setSiteList
 }
 
 // ===================================================== \\
@@ -239,7 +310,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("URL changed: " + activeUrl); // DEBUG:
     }
 });
@@ -255,7 +326,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
@@ -265,6 +336,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("All Chrome windows are now unfocused.");
         // TODO: need an exit active site / url
+        //updateStoredData(activeUrl, true);
 
     } else {
         console.log(`Chrome window with ID ${windowId} is now focused.`);
