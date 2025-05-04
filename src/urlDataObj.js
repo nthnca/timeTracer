@@ -128,7 +128,6 @@ class UrlDataObj {
     * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
     * data from the JSON string, or null if an error occurred during parsing.
     */
-    // TODO: needs tests
     static fromJSONString(jsonString) {
         try {
             const jsonObj = JSON.parse(jsonString);
@@ -177,7 +176,8 @@ class UrlDataObj {
 // ===================================================== \\
 // ===================================================== \\
 
-// this mute code is from: https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
+// this mute code is from: 
+//   https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
 console.original = {
   log: console.log,
   info: console.info,
