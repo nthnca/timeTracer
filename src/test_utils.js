@@ -5,7 +5,8 @@
 // ===================================================== \\
 // ===================================================== \\
 
-// this mute code is from: https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
+// this mute code is from:
+//   https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
 console.original = {
   log: console.log,
   info: console.info,
@@ -28,16 +29,6 @@ function unmuteConsole() {
   console.warn = console.original.warn;
   console.error = console.original.error;
   console.trace = console.original.trace;
-}
-
-// this is a mock of the real function that uses the chrome API
-async function setActiveUrlIndex(index) {
-    index; // silence unused var warning
-}
-
-// this is a mock of the real function that uses the chrome API
-async function getActiveUrlIndex() {
-    return 0;
 }
 
 // ===================================================== \\
@@ -66,14 +57,6 @@ async function runAllTests() {
     passRate += minutesFromMilliseconds_basic();
     console.log();
 
-    //testCount += 1;
-    //passRate += await endAndRecordSession_basic();
-    console.log();
-
-    testCount += 1;
-    passRate += await startTrackingSession_basic();
-    console.log();
-
     console.log(`Utils - Total Pass Rate --------------------- ${passRate}/${testCount} `)
 }
 
@@ -86,21 +69,6 @@ runAllTests();
 //                      Utilities
 // ===================================================== \\
 // ===================================================== \\
-
-function createTrackingObj() {
-    return {
-        activeUrl: null,
-        activeUrlStartDate: null,
-        urlList: [] // list of {url: "google.com", totalTime: 1000 /* ms */}
-    }
-}
-
-function createNewUrlListItem(newUrl) {
-    return {
-        url: newUrl,
-        totalTime: 0,
-    };
-}
 
 /**
  * Searches an array of data objects for a specific URL and returns its index.
@@ -176,64 +144,6 @@ function cleanUrl(url) {
  */
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
-}
-
-/**
- * Asynchronously starts a new tracking session for a website.
- * It updates the 'startDate' to the ISO 8601 format of the provided 'currentTime'
- * (or the current timestamp if no 'currentTime' is provided) and sets 'isActive'
- * to true for the website object at the given index in the site list.
- * It also sets this index as the currently active site.
- * Logs an error if 'startDate' or 'isActive' are already truthy before starting.
- *
- * @async
- * @param {Array<object>} siteList - An array of website objects being tracked.
- * Each object is expected to have properties like 'url', 'startDate', 'isActive', and 'totalTime'.
- * @param {number} newUrlIndex - The index in the siteList of the website to start tracking.
- * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
- * Defaults to the current timestamp if not provided, allowing for easier testing.
- * @returns {Promise<void>} - A Promise that resolves when the session is started and the active index is set.
- */
-async function startTrackingSession(siteList, newUrlIndex, currentTime = new Date()) {
-    let newItem = siteList[newUrlIndex];
-
-    // log error if (startDate, isActive) are not (null, false)
-    if (newItem.startDate || newItem.isActive) {
-        // TODO: write a test for this path
-        console.error("Error: startDate should never be true on enter ", newItem);
-    }
-
-    // set new values
-    newItem.startDate = currentTime.toISOString();
-    newItem.isActive = true;
-    setActiveUrlIndex(newUrlIndex);
-}
-
-/**
- * Asynchronously ends the tracking session for a previously active website and records the usage time.
- * It retrieves the website object at the provided 'prevActiveIndex', calculates the time
- * elapsed between its 'startDate' and the provided 'currentTime' (or the current
- * timestamp if no 'currentTime' is provided), adds this elapsed time to its 'totalTime',
- * and then resets its 'startDate' to null and 'isActive' to false.
- *
- * @async
- * @param {Array<object>} siteList - An array of website objects being tracked.
- * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
- * @param {number} prevActiveIndex - The index in the siteList of the website whose session is ending.
- * @param {Date} [currentTime=new Date()] - An optional Date object representing the ending time.
- * Defaults to the current timestamp if not provided, allowing for easier testing.
- * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
- */
-async function endAndRecordSession(siteList, prevActiveIndex, currentTime = new Date()) {
-    // find prev item
-    let prevItem = siteList[prevActiveIndex];
-
-    // calc usage time
-    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), currentTime);
-    // update values
-    prevItem.totalTime += elapsedTime;
-    prevItem.startDate = null;
-    prevItem.isActive = false;
 }
 
 // END_IMPORT_HERE
@@ -376,103 +286,6 @@ function minutesFromMilliseconds_basic() {
         return 1;
     } else {
         console.log(`minutesFromMilliseconds --------------------- ❗ `);
-        return 0;
-    }
-}
-
-// test that endAndRecordSession sets:
-//      activeItem.totalTime =+ elpsed time
-//      this.activeUrl = null;
-//      this.startTime = null;
-async function endAndRecordSession_basic() {
-    // setup
-    let testList = [
-        { // this is the active url
-            url: "google.com",
-            startDate: new Date(2024, 0, 7, 11, 0, 0, 0),   // Example: January 7, 2024, 11:00 AM
-            totalTime: 10, // in ms
-            isActive: true,
-        },
-        {
-            url: "reddit.com",
-            startDate: null,
-            totalTime: 0, // in ms
-            isActive: false,
-        }
-    ]
-
-    // exercise
-    await endAndRecordSession(testList, 0, new Date(2024, 0, 7, 11, 10, 0, 0));
-
-    // check / test
-    let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function in endAndRecordSession
-    let url = testList[updatedItemIndex].url;
-    let startDate = testList[updatedItemIndex].startDate;
-    let totalTime = testList[updatedItemIndex].totalTime;
-    let isActive = testList[updatedItemIndex].isActive;
-
-    if (
-        url === "google.com"
-            && !isActive
-            && startDate == null
-            && totalTime === 600010 // should be 600,000 ms
-    ) {
-        console.log(`endAndRecordSession_basic ------------------- ✔️ `);
-        return 1;
-    } else {
-        console.log(`endAndRecordSession_basic --------------------❗ `);
-        console.log(`url:        ${url} == google.com = ${url === "google.com"}`)
-        console.log(`isActive:   ${isActive} == false = ${!isActive}`)
-        console.log(`startDate:  ${startDate} == null = ${startDate == null}`)
-        console.log(`total Time: ${totalTime} == 600010 = ${600010}`)
-        return 0;
-    }
-}
-
-// test startTrackingSession basic
-async function startTrackingSession_basic() {
-
-    // setup
-    let testList = [
-        { // this is the active url
-            url: "google.com",
-            startDate: null,
-            totalTime: 10, // in ms
-            isActive: false,
-        },
-        {
-            url: "reddit.com",
-            startDate: null,
-            totalTime: 0, // in ms
-            isActive: false,
-        }
-    ]
-
-    let currentDate = new Date(2024, 0, 7, 11, 10, 0, 0); // Example: January 7, 2024, 11:10 AM
-
-    // exercise
-    await startTrackingSession(testList, 0, currentDate);
-
-    // check / test
-    let updatedItemIndex = await getActiveUrlIndex(); // a mock of the function used in endAndRecordSession
-    let url = testList[updatedItemIndex].url;
-    let startDate = testList[updatedItemIndex].startDate; // not tested due to date obj use
-    let totalTime = testList[updatedItemIndex].totalTime;
-    let isActive = testList[updatedItemIndex].isActive;
-
-    if (
-        url === "google.com"
-            && isActive
-            && totalTime == 10
-            && startDate === currentDate.toISOString()
-    ) {
-        console.log(`startTrackingSession_basic ------------------ ✔️ `);
-        return 1;
-    } else {
-        console.log(`startTrackingSession_basic ------------------ ❗ `);
-        console.log(`url:        ${url} == google.com = ${url === "google.com"}`)
-        console.log(`isActive:   ${isActive} == false = ${!isActive}`)
-        console.log(`startDate:  ${startDate} == ${currentDate.toISOString()} = ${startDate == null}`)
         return 0;
     }
 }
