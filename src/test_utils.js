@@ -47,31 +47,30 @@ async function getActiveUrlIndex() {
 // ===================================================== \\
 
 async function runAllTests() {
-    let testCount = 12;
+    let testCount = 0;
     let passRate = 0;
     console.log("\n------ ---- ---- ---- utils ---- ---- ---- ------")
 
     passRate += searchDataUrls_found();
     passRate += searchDataUrls_notFound();
+    testCount += 2;
     console.log();
 
+    testCount += 3;
     passRate += cleanUrl_basicReddit();
     passRate += cleanUrl_basicGoogleMail();
     passRate += cleanUrl_basicGoogleGemini();
     console.log();
 
-    passRate += calcTimeElapsed_minutes();
-    passRate += calcTimeElapsed_hours();
-    passRate += calcTimeElapsed_doubleDate();
-    passRate += calcTimeElapsed_doubleDateFix();
-    console.log()
-
+    testCount += 1;
     passRate += minutesFromMilliseconds_basic();
     console.log();
 
-    passRate += await endAndRecordSession_basic();
+    //testCount += 1;
+    //passRate += await endAndRecordSession_basic();
     console.log();
 
+    testCount += 1;
     passRate += await startTrackingSession_basic();
     console.log();
 
@@ -88,12 +87,19 @@ runAllTests();
 // ===================================================== \\
 // ===================================================== \\
 
-function createTrackingObj(currentDate = new Date()) {
+function createTrackingObj() {
     return {
-        activeUrl: "",
-        activeUrlStartDate: currentDate,
+        activeUrl: null,
+        activeUrlStartDate: null,
         urlList: [] // list of {url: "google.com", totalTime: 1000 /* ms */}
     }
+}
+
+function createNewUrlListItem(newUrl) {
+    return {
+        url: newUrl,
+        totalTime: 0,
+    };
 }
 
 /**
@@ -160,25 +166,6 @@ function cleanUrl(url) {
         console.error("Invalid URL:", url, error);
         return null;
     }
-}
-
-/**
- * Calculates the time elapsed between a given start date and the current time, in milliseconds.
- *
- * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
- * @returns {number} The time elapsed in milliseconds.
- */
-function calcTimeElapsed(startDate, endDate) {
-
-    // TODO: the line below this might be better then the current one
-    //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
-    if (Object.prototype.toString.call(startDate) !== '[object Date]') {
-        console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
-        console.trace();
-        return null; // Or throw error
-    }
-
-    return endDate - startDate;
 }
 
 /**
@@ -375,99 +362,6 @@ function cleanUrl_basicGoogleGemini() {
     }
 }
 
-// Calc time Elapsed tests
-function calcTimeElapsed_minutes() {
-    //setup
-    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:30 AM
-    const endDate = new Date(2024, 0, 7, 10, 40, 0, 0); // Example: January 7, 2024, 10:40 AM
-
-    //exercise
-    const time = calcTimeElapsed(startDate, endDate);
-
-    // check / test
-    if (time == 600000) {
-        console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
-        return 1;
-    } else {
-        console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
-        return 0;
-    }
-}
-
-// Calc time Elapsed tests
-function calcTimeElapsed_hours() {
-    //setup
-    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:00 AM
-    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
-
-    //exercise
-    const time = calcTimeElapsed(startDate, endDate);
-
-    // check / test
-    // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
-    if (time == 3600000) {
-        console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
-        return 1;
-    } else {
-        console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
-        console.log(time);
-        return 0;
-    }
-}
-
-// Calc time Elapsed tests
-//      test if startDate is a date obj
-//      if not trough err
-function calcTimeElapsed_doubleDate() {
-    //setup
-    const startDate = "January 7, 2024, 11:00 AM";
-    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
-
-    //exercise
-    muteConsole();
-    const time = calcTimeElapsed(startDate, endDate);
-    unmuteConsole();
-
-    // check / test
-    // error and return null
-    if (time == null) {
-        console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
-        return 1;
-    } else {
-        console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
-        console.log(time);
-        return 0;
-    }
-}
-
-// Calc time Elapsed tests
-//      test if startDate is a date obj
-//      if not trough err
-function calcTimeElapsed_doubleDateFix() {
-    //setup
-    let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
-    const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
-    startDate = JSON.stringify(startDate.toISOString());
-    startDate = JSON.parse(startDate);
-    startDate = new Date(startDate);
-
-    // BUG: get this to work
-    //exercise
-    muteConsole();
-    const time = calcTimeElapsed(startDate, endDate);
-    unmuteConsole();
-
-    // check / test
-    if (time == 0) {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
-        return 1;
-    } else {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
-        console.log(time);
-        return 0;
-    }
-}
-
 // minutes from milli-secs test
 function minutesFromMilliseconds_basic() {
     //setup
@@ -486,7 +380,10 @@ function minutesFromMilliseconds_basic() {
     }
 }
 
-// test_endAndRecordSession_basic
+// test that endAndRecordSession sets:
+//      activeItem.totalTime =+ elpsed time
+//      this.activeUrl = null;
+//      this.startTime = null;
 async function endAndRecordSession_basic() {
     // setup
     let testList = [

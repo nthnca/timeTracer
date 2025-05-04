@@ -1,5 +1,4 @@
 
-
 // BEGIN_IMPORT_HERE
 
 // ===================================================== \\
@@ -86,16 +85,16 @@ class UrlDataObj {
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
 
         if (activeItem) {
-            const elapsedTime = calcTimeElapsed(this.startTime, currentTime);
+            const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
 
             activeItem.totalTime += elapsedTime;
-            activeItem.startDate = null;
-            activeItem.isActive = false;
 
             this.activeUrl = null;
             this.startTime = null;
+        } else {
+            console.error("Error: activeItem was null when endSession was called.");
+            return false;
         }
-        console.error("Error: activeItem was null when endSession was called.");
     }
 
     /**
@@ -147,9 +146,60 @@ class UrlDataObj {
             return null;
         }
     }
+
+    /**
+    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+    *
+    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+    * @returns {number} The time elapsed in milliseconds.
+    */
+    calcTimeElapsed(startDate, endDate) {
+
+        // TODO: the line below this might be better then the current one
+        //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
+        if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+            console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
+            console.trace();
+            return null; // Or throw error
+        }
+
+        return endDate - startDate;
+    }
 }
 
 // END_IMPORT_HERE
+
+// ===================================================== \\
+// ===================================================== \\
+//                    Test Helpers
+// ===================================================== \\
+// ===================================================== \\
+
+// this mute code is from: https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
+console.original = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  trace: console.trace
+};
+
+function muteConsole() {
+  console.log = function() {};
+  console.info = function() {};
+  console.warn = function() {}
+  console.error = function() {};
+  console.trace = function() {};
+}
+
+function unmuteConsole() {
+  console.log = console.original.log;
+  console.info = console.original.info;
+  console.warn = console.original.warn;
+  console.error = console.original.error;
+  console.trace = console.original.trace;
+}
+
 
 // ===================================================== \\
 // ===================================================== \\
@@ -171,6 +221,17 @@ async function runAllTests() {
     passRate += test_startSession_existingSession();
     testCount += 2;
     console.log();
+
+    passRate += test_endSession_basic();
+    testCount += 1;
+    console.log();
+
+    testCount += 4;
+    passRate += calcTimeElapsed_minutes();
+    passRate += calcTimeElapsed_hours();
+    passRate += calcTimeElapsed_doubleDate();
+    passRate += calcTimeElapsed_doubleDateFix();
+    console.log()
 
     console.log(`urlDataObj - Total Pass Rate ---------------- ${passRate}/${testCount} `)
 }
@@ -275,7 +336,9 @@ function test_startSession_existingSession() {
     const newTime = new Date(2024, 0, 7, 10, 10, 0, 0); // Example: January 7, 2024, 10:10 AM
 
     // exercise
+    muteConsole();
     const result = trackerObj.startSession(newUrl, newTime);
+    unmuteConsole();
 
     // check / test
 
@@ -284,6 +347,143 @@ function test_startSession_existingSession() {
         return 1;
     } else {
         console.log(`test_startSession_existingSession ----------- ❗ `);
+        return 0;
+    }
+}
+
+// test if end sesstion sets all the right values
+function test_endSession_basic() {
+    // Setup
+    const trackerObj = new UrlDataObj();
+    const testUrl = "test-url.com";
+    trackerObj.activeUrl = testUrl;
+    trackerObj.startTime = new Date(2024, 0, 1, 10, 0, 0); // Example start time
+    trackerObj.urlList.push( { url: testUrl, totalTime: 4 } );
+
+    const endTime = new Date(2024, 0, 1, 10, 30, 0); // Example end time (30 minutes later)
+    const expectedElapsedTime = (endTime - trackerObj.startTime) + 4; // in milli sec
+
+    // Exercise
+    trackerObj.endSession(endTime);
+
+    // Check / Test
+    const endedSessionUrl = trackerObj.activeUrl;
+    const endedSessionStartTime = trackerObj.startTime;
+    const targetItem = trackerObj.urlList.find(item => item.url === testUrl);
+
+    if (
+        endedSessionUrl === null &&
+        endedSessionStartTime === null &&
+        targetItem && // Make sure targetItem exists
+        targetItem.totalTime === expectedElapsedTime &&
+        trackerObj.startTime === null
+    ) {
+        console.log(`test_endSession_basic ----------------------- ✔️ `);
+        return 1;
+    } else {
+        console.log(`test_endSession_basic ----------------------- ❗ `);
+        console.log("endedSessionUrl:       ", endedSessionUrl === null);
+        console.log("endedSessionStartTime: ", endedSessionStartTime === null);
+        console.log("targetItem:            ", !!targetItem);
+        console.log("targetItem.totalTime:  ", targetItem.totalTime === expectedElapsedTime);
+        console.log("targetItem.startDate   ", trackerObj.startTime === null);
+        return 0;
+    }
+}
+
+// Calc time Elapsed tests
+function calcTimeElapsed_minutes() {
+    //setup
+    const trackerObj = new UrlDataObj();
+    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:30 AM
+    const endDate = new Date(2024, 0, 7, 10, 40, 0, 0); // Example: January 7, 2024, 10:40 AM
+
+    //exercise
+    const time = trackerObj.calcTimeElapsed(startDate, endDate);
+
+    // check / test
+    if (time == 600000) {
+        console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
+        return 1;
+    } else {
+        console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
+        return 0;
+    }
+}
+
+// Calc time Elapsed tests
+function calcTimeElapsed_hours() {
+    //setup
+    const trackerObj = new UrlDataObj();
+    const startDate = new Date(2024, 0, 7, 10, 30, 0, 0); // Example: January 7, 2024, 10:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
+
+    //exercise
+    const time = trackerObj.calcTimeElapsed(startDate, endDate);
+
+    // check / test
+    // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
+    if (time == 3600000) {
+        console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
+        return 1;
+    } else {
+        console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
+        console.log(time);
+        return 0;
+    }
+}
+
+// Calc time Elapsed tests
+//      test if startDate is a date obj
+//      if not trough err
+function calcTimeElapsed_doubleDate() {
+    //setup
+    const trackerObj = new UrlDataObj();
+    const startDate = "January 7, 2024, 11:00 AM";
+    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
+
+    //exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(startDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    // error and return null
+    if (time == null) {
+        console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
+        return 1;
+    } else {
+        console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
+        console.log(time);
+        return 0;
+    }
+}
+
+// Calc time Elapsed tests
+//      test if startDate is a date obj
+//      if not trough err
+function calcTimeElapsed_doubleDateFix() {
+    //setup
+    const trackerObj = new UrlDataObj();
+    let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    startDate = JSON.stringify(startDate.toISOString());
+    startDate = JSON.parse(startDate);
+    startDate = new Date(startDate);
+
+    // BUG: get this to work
+    //exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(startDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    if (time == 0) {
+        console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
+        return 1;
+    } else {
+        console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
+        console.log(time);
         return 0;
     }
 }
