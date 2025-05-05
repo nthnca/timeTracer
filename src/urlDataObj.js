@@ -82,19 +82,28 @@ class UrlDataObj {
     * allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
-        const activeItem = this.urlList.find(item => item.url === this.activeUrl);
-
-        if (activeItem) {
-            const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
-
-            activeItem.totalTime += elapsedTime;
-
-            this.activeUrl = null;
-            this.startTime = null;
-        } else {
+        if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
             return false;
         }
+
+        const activeItem = this.urlList.find(item => item.url === this.activeUrl);
+        const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
+
+        if (activeItem) {
+            activeItem.totalTime += elapsedTime;
+
+        } else {
+            // TODO: update tests to cover this case
+            // TODO: TODO: add updateStoredData to enter exit chrome calls
+            // add item to list
+            this.urlList.push( {
+                url: this.activeUrl,
+                totalTime: elapsedTime
+            })
+        }
+        this.activeUrl = null;
+        this.startTime = null;
     }
 
     /**
@@ -128,8 +137,13 @@ class UrlDataObj {
     * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
     * data from the JSON string, or null if an error occurred during parsing.
     */
-    static fromJSONString(jsonString) {
+    fromJSONString(jsonString) {
         try {
+            // check the obj is of the right type
+            if (!(typeof jsonString === "string")) {
+                console.error("Error: jsonString not instance of String - fromJSONString()");
+                console.error("jsonString Typeof:", typeof jsonString);
+            }
             const jsonObj = JSON.parse(jsonString);
 
             const trackingData = new UrlDataObj();
@@ -176,7 +190,7 @@ class UrlDataObj {
 // ===================================================== \\
 // ===================================================== \\
 
-// this mute code is from: 
+// this mute code is from:
 //   https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
 console.original = {
   log: console.log,
