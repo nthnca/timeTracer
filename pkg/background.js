@@ -1,6 +1,187 @@
 
 // ===================================================== \\
 // ===================================================== \\
+//                     UrlDataObj
+// ===================================================== \\
+// ===================================================== \\
+
+class UrlDataObj {
+    constructor() {
+        this.activeUrl = null;
+        this.startTime = null
+        this.urlList = [];
+    }
+
+    /**
+    * Retrieves the currently active URL being tracked.
+    *
+    * @returns {string} - The currently active URL, or an empty string if no URL is active.
+    */
+    getActiveUrl() {
+        return this.activeUrl;
+    }
+
+    /**
+    * Sets the currently active URL being tracked and updates the tracking start time.
+    *
+    * @param {string} url - The URL to set as the currently active one.
+    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+    * starting time for this active URL. Defaults to the current timestamp if not provided,
+    * allowing for easier testing.
+    */
+    appendListItem(url) {
+        if (!this.urlList.some(item => item.url === url)) {
+            this.urlList.push( { url: url, totalTime: 0 } );
+            return true; // Indicate that a new item was appended
+        }
+        return false; // Indicate that the item already existed
+    }
+
+    /**
+    * Starts a new tracking session for a given URL.
+    * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+    * provided 'currentTime' (or the current timestamp if not provided).
+    * Logs an error and returns false if 'startTime' or 'activeUrl' are already
+    * truthy when attempting to start a new session.
+    *
+    * @param {string} url - The URL to set as the currently active one to start tracking.
+    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+    * starting time of the session. Defaults to the current timestamp if not provided,
+    * allowing for easier testing.
+    * @returns {boolean} - True if the session was started successfully, false otherwise
+    * (e.g., if a session was already active).
+    */
+    startSession(url, currentTime = new Date()) {
+        if (this.startTime || this.activeUrl) {
+            // TODO: write a test for this path
+            console.error("Error: startTime / activeUrl should never be true on enter ",
+                "old startTime: ", this.startTime,
+                "old activeUrl: ", this.activeUrl,
+                "new startTime: ", currentTime,
+                "new activeUrl: ", url
+            );
+            return false;
+        }
+
+        this.activeUrl = url;
+        this.startTime = currentTime;
+    }
+
+    /**
+    * Ends the currently active tracking session and records the elapsed time.
+    * It finds the active URL in the urlList, calculates the time elapsed since
+    * the 'startTime', adds it to the 'totalTime' of the corresponding item,
+    * and resets the 'startDate' and 'isActive' properties of that item.
+    * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+    * Logs an error if no active item is found.
+    *
+    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+    * ending time of the session. Defaults to the current timestamp if not provided,
+    * allowing for easier testing.
+    */
+    endSession(currentTime = new Date()) {
+        if (this.activeUrl == null) {
+            console.error("Error: activeItem was null when endSession was called.");
+            return false;
+        }
+
+        const activeItem = this.urlList.find(item => item.url === this.activeUrl);
+        const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
+
+        if (activeItem) {
+            activeItem.totalTime += elapsedTime;
+
+        } else {
+            // TODO: update tests to cover this case
+            // add item to list
+            this.urlList.push( {
+                url: this.activeUrl,
+                totalTime: elapsedTime
+            })
+        }
+        this.activeUrl = null;
+        this.startTime = null;
+    }
+
+    /**
+     * Converts the TrackingData object into a JSON string.
+     * Date objects are converted to ISO 8601 string format for serialization.
+     *
+     * @returns {string} - A JSON string representing the TrackingData.
+     * The string includes 'activeUrl', 'startTime' (as an ISO string or null), and
+     * 'urlList' (an array of objects with 'url' and 'totalTime' properties).
+     */
+    toJSONString() {
+        const jsonObject = {
+            activeUrl: this.activeUrl,
+            startTime: this.startTime ? this.startTime.toISOString() : null,
+            urlList: this.urlList.map(item => ({
+                url: item.url,
+                totalTime: item.totalTime
+            }))
+        };
+        return JSON.stringify(jsonObject);
+    }
+
+    /**
+    * Creates a new UrlDataObj instance from a JSON string.
+    * It attempts to parse the JSON string and populate the properties
+    * of a new UrlDataObj. Date strings in the JSON are converted back
+    * to Date objects. Handles potential JSON parsing errors and returns null
+    * in case of an error.
+    *
+    * @param {string} jsonString - The JSON string to parse.
+    * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
+    * data from the JSON string, or null if an error occurred during parsing.
+    */
+    fromJSONString(jsonString) {
+        try {
+            // check the obj is of the right type
+            if (!(typeof jsonString === "string")) {
+                console.error("Error: jsonString not instance of String - fromJSONString()");
+                console.error("jsonString Typeof:", typeof jsonString);
+            }
+            const jsonObj = JSON.parse(jsonString);
+
+            const trackingData = new UrlDataObj();
+            trackingData.activeUrl = jsonObj.activeUrl;
+            trackingData.startTime = jsonObj.startTime ? new Date(jsonObj.startTime) : null;
+            trackingData.urlList = jsonObj.urlList ? jsonObj.urlList.map(item => ({
+                url: item.url,
+                totalTime: item.totalTime
+            })) : [];
+
+            return trackingData;
+
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+            return null;
+        }
+    }
+
+    /**
+    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+    *
+    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+    * @returns {number} The time elapsed in milliseconds.
+    */
+    calcTimeElapsed(startDate, endDate) {
+
+        // TODO: the line below this might be better then the current one
+        //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
+        if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+            console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
+            console.trace();
+            return null; // Or throw error
+        }
+
+        return endDate - startDate;
+    }
+}
+
+
+// ===================================================== \\
+// ===================================================== \\
 //                      Utilities
 // ===================================================== \\
 // ===================================================== \\
@@ -72,25 +253,6 @@ function cleanUrl(url) {
 }
 
 /**
- * Calculates the time elapsed between a given start date and the current time, in milliseconds.
- *
- * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
- * @returns {number} The time elapsed in milliseconds.
- */
-function calcTimeElapsed(startDate, endDate) {
-
-    // TODO: the line below this might be better then the current one
-    //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
-    if (Object.prototype.toString.call(startDate) !== '[object Date]') {
-        console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
-        console.trace();
-        return null; // Or throw error
-    }
-
-    return endDate - startDate;
-}
-
-/**
  * Calculates the number of minutes from a given number of milliseconds.
  *
  * @param {number} milliseconds - The number of milliseconds.
@@ -98,58 +260,6 @@ function calcTimeElapsed(startDate, endDate) {
  */
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
-}
-
-/**
- * Asynchronously starts a new tracking session for a website.
- * It updates the 'startDate' to the current timestamp in ISO 8601 format
- * and sets 'isActive' to true for the website object at the given index
- * in the site list. It also sets this index as the currently active site.
- * Logs an error if 'startDate' or 'isActive' are already truthy before starting.
- *
- * @async
- * @param {Array<object>} siteList - An array of website objects being tracked.
- * Each object is expected to have properties like 'url', 'startDate', 'isActive', and 'totalTime'.
- * @param {number} newUrlIndex - The index in the siteList of the website to start tracking.
- * @returns {Promise<void>} - A Promise that resolves when the session is started and the active index is set.
- */
-async function startTrackingSession(siteList, newUrlIndex) {
-    let newItem = siteList[newUrlIndex];
-
-    // log error if (startDate, isActive) are not (null, false)
-    if (newItem.startDate || newItem.isActive) {
-        // TODO: write a test for this path
-        console.error("Error: startDate should never be true on enter ", newItem);
-    }
-
-    // set new values
-    newItem.startDate = (new Date()).toISOString();
-    newItem.isActive = true;
-    setActiveUrlIndex(newUrlIndex);
-}
-
-/**
- * Asynchronously ends the tracking session for a previously active website and records the usage time.
- * It retrieves the website object at the provided 'prevActiveIndex', calculates the time
- * elapsed since its 'startDate', adds this time to its 'totalTime', and then resets
- * its 'startDate' to null and 'isActive' to false.
- *
- * @async
- * @param {Array<object>} siteList - An array of website objects being tracked.
- * Each object is expected to have properties like 'startDate', 'isActive', and 'totalTime'.
- * @param {number} prevActiveIndex - The index in the siteList of the website whose session is ending.
- * @returns {Promise<void>} - A Promise that resolves when the session is ended and the usage time is recorded.
- */
-async function endAndRecordSession(siteList, prevActiveIndex) {
-    // find prev item
-    let prevItem = siteList[prevActiveIndex];
-
-    // calc usage time
-    let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
-    // update values
-    prevItem.totalTime += elapsedTime;
-    prevItem.startDate = null;
-    prevItem.isActive = false;
 }
 
 
@@ -169,11 +279,11 @@ async function endAndRecordSession(siteList, prevActiveIndex) {
  * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
  */
 async function storeChromeLocalData(key, data) {
-    chrome.storage.local.set({ [key]: JSON.stringify(data)}, function() {
+    chrome.storage.local.set({ [key]: data}, function() {
         if (chrome.runtime.lastError) {
             console.error('Error saving to local storage:', chrome.runtime.lastError);
         } else {
-            console.log(`Stored - key: ${key}, value: ${JSON.stringify(data)}`);
+            console.log(`Stored - key: ${key}, value: ${data}`);
         }
     });
 }
@@ -191,7 +301,8 @@ async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         console.log(`retrieve - key: ${key}, value: ${result[key]}`);
-        return JSON.parse(result[key]);
+        return result[key];
+
     } catch (error) {
         console.error("Error retrieving data:", error);
         return undefined;
@@ -199,52 +310,43 @@ async function getChromeLocalData(key) {
 }
 
 /**
- * Asynchronously retrieves the list of tracked websites from Chrome's local storage.
+ * Retrieves site data from Chrome local storage.  If no data exists,
+ * it creates a new tracking object.
  *
  * @async
- * @returns {Promise<Array<object>|null|undefined>} - A Promise that resolves with the stored array of website objects,
- * or null/undefined if no data is found for the specified key. Each website object
- * is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ * @function getSiteObjData
+ * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
-async function getSiteList() {
-  let key = "siteList";
-  return getChromeLocalData(key);
+async function getSiteObjData() {
+    let key = "siteData";
+    let siteDataString = await getChromeLocalData(key);
+
+    let siteDataObj = new UrlDataObj();
+
+    // if the data exists parse it into siteDataObj
+    if (siteDataString) {
+        siteDataObj = siteDataObj.fromJSONString(siteDataString);
+    }
+
+    // check the obj is of the right type
+    if (!(siteDataObj instanceof UrlDataObj)) {
+        console.error( "Error: siteData is not instance of UrlDataObj - in getSiteObjData()",);
+    }
+    return siteDataObj;
 }
 
 /**
- * Asynchronously stores the provided list of tracked websites in Chrome's local storage.
+ * Stores site data to Chrome local storage.
  *
  * @async
- * @param {Array<object>} siteList - An array of website objects to store.
- * Each website object is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
- * @returns {Promise<void>} - A Promise that resolves when the site list is successfully stored.
+ * @function setSiteObjData
+ * @param {any} siteDataObj - The site data object to store.
+ * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
  */
-async function setSiteList(siteList) {
-  let key = "siteList";
-  storeChromeLocalData(key, siteList);
-}
-/**
- * Asynchronously sets the index of the currently active URL in local storage.
- *
- * @async
- * @param {number} activeUrlIndex - The index of the currently active URL to store.
- * @returns {Promise<void>} - A Promise that resolves when the active URL index is successfully stored.
- */
-async function setActiveUrlIndex(activeUrlIndex) {
-  let key = "activeSiteIndex";
-  storeChromeLocalData(key, activeUrlIndex);
-}
-
-/**
- * Asynchronously retrieves the index of the currently active URL from local storage.
- *
- * @async
- * @returns {Promise<number|null|undefined>} - A Promise that resolves with the stored active URL index,
- * or null/undefined if no data is found for the key.
- */
-async function getActiveUrlIndex() {
-  let key = "activeSiteIndex";
-  return getChromeLocalData(key);
+async function setSiteObjData(siteDataObj) {
+    let key = "siteData";
+    const siteDataString = siteDataObj.toJSONString();
+    storeChromeLocalData(key, siteDataString);
 }
 
 /**
@@ -255,48 +357,27 @@ async function getActiveUrlIndex() {
  *
  * @param {string} newActiveUrl - The URL to update data for.
  * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
+ * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
  */
 // TODO: change name to update activeUrlSession?
 async function updateStoredData(newActiveUrl, stopTracking) {
-    let key = "siteList";
-    let siteList = await getChromeLocalData(key); // TODO: swap this to getSiteList
+    let siteDataObj = await getSiteObjData();
 
-    // create list if null
-    // TODO: add a log here to track this
-    if (!siteList) {
-        siteList = [];
+    if (!(siteDataObj instanceof UrlDataObj)) {
+        console.error("Error: siteData not instance of UrlDataObj - updateStoredData");
     }
 
     // exit session
     if (stopTracking) {
-        //let activeUrlIndex = searchDataUrls(activeUrl??, siteList);
-        endAndRecordSession(siteList, activeUrlIndex);
+        siteDataObj.endSession();
 
-    } else { // start new session / update url of active session
-        // find urls index in list
-        let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
-
-        // if not in list
-        if (newUrlIndex == -1) {
-            // data storage struc
-            let newListItem = {
-                url: newActiveUrl,
-                startDate: (new Date()).toISOString(),
-                totalTime: 0,
-                isActive: true,
-            };
-
-            // update list
-            siteList.push(newListItem);
-            setActiveUrlIndex(siteList.length - 1);
-
-        } else { // if in list
-            endAndRecordSession(siteList, await getActiveUrlIndex());
-            startTrackingSession(siteList, newUrlIndex);
-        }
+    } else {
+        // BUG: this cant be found
+        siteDataObj.endSession();
+        siteDataObj.startSession(newActiveUrl);
     }
 
-    storeChromeLocalData(key, siteList); // TODO: change this to setSiteList
+    setSiteObjData(siteDataObj);
 }
 
 // ===================================================== \\
