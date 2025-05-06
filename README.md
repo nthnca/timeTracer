@@ -18,6 +18,7 @@
 - test.sh   -- This will run all the test files / scripts
 - build.sh  -- This will parse all my src files into the production script files
 - watch.sh  --  TODO: this is similar to nodemon, it will watch the src files and rebuild production on change
+- todo.sh   -- a script that will print all TODO: to the console from ./src/*
 
 ## Resources:
 - [Basics of Chrome Extensions](https://www.youtube.com/watch?v=Zt_6UXvoKHM)
