@@ -1,4 +1,6 @@
 
+// ADD_TO_FRONT_END_START
+
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -84,6 +86,8 @@ async function setSiteObjData(siteDataObj) {
     const siteDataString = siteDataObj.toJSONString();
     storeChromeLocalData(key, siteDataString);
 }
+
+// ADD_TO_FRONT_END_END
 
 /**
  * Updates stored data for a given URL.
