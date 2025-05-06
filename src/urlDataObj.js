@@ -498,7 +498,6 @@ function calcTimeElapsed_doubleDateFix() {
     startDate = JSON.parse(startDate);
     startDate = new Date(startDate);
 
-    // BUG: get this to work
     //exercise
     muteConsole();
     const time = trackerObj.calcTimeElapsed(startDate, endDate);
@@ -578,7 +577,7 @@ function test_fromJSONString_basic() {
     });
 
     // Exercise
-    const trackerObj = UrlDataObj.fromJSONString(jsonString);
+    const trackerObj = expectedTrackerObj.fromJSONString(jsonString);
 
     // Check / Test
     const activeUrlMatch = trackerObj.activeUrl === expectedTrackerObj.activeUrl;
@@ -614,7 +613,7 @@ function test_toJSON_fromJSON_integration() {
 
     // Exercise
     const jsonString = originalTrackerObj.toJSONString();
-    const reconstructedTrackerObj = UrlDataObj.fromJSONString(jsonString);
+    const reconstructedTrackerObj = originalTrackerObj.fromJSONString(jsonString);
 
     // Check / Test
     const activeUrlMatch = reconstructedTrackerObj.activeUrl === originalTrackerObj.activeUrl;
