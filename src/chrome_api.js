@@ -1,4 +1,6 @@
 
+// ADD_TO_FRONT_END_START
+
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -15,11 +17,11 @@
  * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
  */
 async function storeChromeLocalData(key, data) {
-    chrome.storage.local.set({ [key]: JSON.stringify(data)}, function() {
+    chrome.storage.local.set({ [key]: data}, function() {
         if (chrome.runtime.lastError) {
             console.error('Error saving to local storage:', chrome.runtime.lastError);
         } else {
-            console.log(`Stored - key: ${key}, value: ${JSON.stringify(data)}`);
+            console.log(`Stored - key: ${key}, value: ${data}`);
         }
     });
 }
@@ -37,7 +39,8 @@ async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         console.log(`retrieve - key: ${key}, value: ${result[key]}`);
-        return JSON.parse(result[key]);
+        return result[key];
+
     } catch (error) {
         console.error("Error retrieving data:", error);
         return undefined;
@@ -45,53 +48,46 @@ async function getChromeLocalData(key) {
 }
 
 /**
- * Asynchronously retrieves the list of tracked websites from Chrome's local storage.
+ * Retrieves site data from Chrome local storage.  If no data exists,
+ * it creates a new tracking object.
  *
  * @async
- * @returns {Promise<Array<object>|null|undefined>} - A Promise that resolves with the stored array of website objects,
- * or null/undefined if no data is found for the specified key. Each website object
- * is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
+ * @function getSiteObjData
+ * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
-async function getSiteList() {
-  let key = "siteList";
-  return getChromeLocalData(key);
+async function getSiteObjData() {
+    let key = "siteData";
+    let siteDataString = await getChromeLocalData(key);
+
+    let siteDataObj = new UrlDataObj();
+
+    // if the data exists parse it into siteDataObj
+    if (siteDataString) {
+        siteDataObj = siteDataObj.fromJSONString(siteDataString);
+    }
+
+    // check the obj is of the right type
+    if (!(siteDataObj instanceof UrlDataObj)) {
+        console.error( "Error: siteData is not instance of UrlDataObj - in getSiteObjData()",);
+    }
+    return siteDataObj;
 }
 
 /**
- * Asynchronously stores the provided list of tracked websites in Chrome's local storage.
+ * Stores site data to Chrome local storage.
  *
  * @async
- * @param {Array<object>} siteList - An array of website objects to store.
- * Each website object is expected to have properties like 'url', 'startDate', 'totalTime', and 'isActive'.
- * @returns {Promise<void>} - A Promise that resolves when the site list is successfully stored.
+ * @function setSiteObjData
+ * @param {any} siteDataObj - The site data object to store.
+ * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
  */
-async function setSiteList(siteList) {
-  let key = "siteList";
-  storeChromeLocalData(key, siteList);
-}
-/**
- * Asynchronously sets the index of the currently active URL in local storage.
- *
- * @async
- * @param {number} activeUrlIndex - The index of the currently active URL to store.
- * @returns {Promise<void>} - A Promise that resolves when the active URL index is successfully stored.
- */
-async function setActiveUrlIndex(activeUrlIndex) {
-  let key = "activeSiteIndex";
-  storeChromeLocalData(key, activeUrlIndex);
+async function setSiteObjData(siteDataObj) {
+    let key = "siteData";
+    const siteDataString = siteDataObj.toJSONString();
+    storeChromeLocalData(key, siteDataString);
 }
 
-/**
- * Asynchronously retrieves the index of the currently active URL from local storage.
- *
- * @async
- * @returns {Promise<number|null|undefined>} - A Promise that resolves with the stored active URL index,
- * or null/undefined if no data is found for the key.
- */
-async function getActiveUrlIndex() {
-  let key = "activeSiteIndex";
-  return getChromeLocalData(key);
-}
+// ADD_TO_FRONT_END_END
 
 /**
  * Updates stored data for a given URL.
@@ -101,55 +97,26 @@ async function getActiveUrlIndex() {
  *
  * @param {string} newActiveUrl - The URL to update data for.
  * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
+ * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
  */
-async function updateStoredData(newActiveUrl) {
-    let key = "siteList";
-    let siteList = await getChromeLocalData(key);
+// TODO: change name to update activeUrlSession?
+async function updateStoredData(newActiveUrl, stopTracking) {
+    let siteDataObj = await getSiteObjData();
 
-    // create list if null
-    if (!siteList) {
-        siteList = [];
+    if (!(siteDataObj instanceof UrlDataObj)) {
+        console.error("Error: siteData not instance of UrlDataObj - updateStoredData");
     }
 
-    // find urls index in list
-    let newUrlIndex = searchDataUrls(newActiveUrl, siteList);
+    // exit session
+    if (stopTracking) {
+        siteDataObj.endSession();
 
-    // if not in list
-    if (newUrlIndex == -1) {
-
-        // data storage struc
-        let newListItem = {
-            url: newActiveUrl,
-            startDate: (new Date()).toISOString(),
-            totalTime: 0,
-            isActive: true,
-        };
-
-        // update list
-        siteList.push(newListItem);
-        setActiveUrlIndex(siteList.length - 1);
-
-    } else { // if in list
-
-        // find prev item index
-        let prevActiveIndex = await getActiveUrlIndex();
-        let prevItem = siteList[prevActiveIndex];
-
-        // calc usage time
-        let elapsedTime = calcTimeElapsed(new Date(prevItem.startDate), new Date());
-        // update values
-        prevItem.totalTime += elapsedTime;
-        prevItem.startDate = null;
-        prevItem.isActive = false;
-
-        // set new current url obj values
-        let newItem = siteList[newUrlIndex];
-        newItem.startDate = (new Date()).toISOString();
-        newItem.isActive = true;
-        setActiveUrlIndex(newUrlIndex);
+    } else {
+        siteDataObj.endSession();
+        siteDataObj.startSession(newActiveUrl);
     }
 
-    storeChromeLocalData(key, siteList);
+    setSiteObjData(siteDataObj);
 }
 
 // ===================================================== \\
@@ -163,7 +130,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("URL changed: " + activeUrl); // DEBUG:
     }
 });
@@ -179,7 +146,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
-        updateStoredData(activeUrl);
+        updateStoredData(activeUrl, false);
         console.log("Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
@@ -188,11 +155,23 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("All Chrome windows are now unfocused.");
-        // TODO: need an exit active site / url
+        updateStoredData("", true);
 
     } else {
         console.log(`Chrome window with ID ${windowId} is now focused.`);
-        // TODO: enter active site / url
+
+        // When focused, query for the active tab in the currently focused window.
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs && tabs.length > 0) {
+                const activeTab = tabs[0];
+                const activeUrl = cleanUrl(activeTab.url);
+
+                console.log("Active Tab URL on focus:", activeUrl);
+                updateStoredData(activeUrl, false); // Start tracking the newly active URL
+            } else {
+                console.log("No active tab found in the newly focused window.");
+            }
+        });
     }
 });
 
