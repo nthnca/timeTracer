@@ -151,12 +151,23 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("All Chrome windows are now unfocused.");
-        // TODO: need an exit active site / url
-        //updateStoredData(activeUrl, true);
+        updateStoredData("", true);
 
     } else {
         console.log(`Chrome window with ID ${windowId} is now focused.`);
-        // TODO: enter active site / url
+
+        // When focused, query for the active tab in the currently focused window.
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs && tabs.length > 0) {
+                const activeTab = tabs[0];
+                const activeUrl = cleanUrl(activeTab.url);
+
+                console.log("Active Tab URL on focus:", activeUrl);
+                updateStoredData(activeUrl, false); // Start tracking the newly active URL
+            } else {
+                console.log("No active tab found in the newly focused window.");
+            }
+        });
     }
 });
 
