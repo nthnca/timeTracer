@@ -95,7 +95,6 @@ class UrlDataObj {
 
         } else {
             // TODO: update tests to cover this case
-            // TODO: TODO: add updateStoredData to enter exit chrome calls
             // add item to list
             this.urlList.push( {
                 url: this.activeUrl,
