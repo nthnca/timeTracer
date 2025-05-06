@@ -1,13 +1,4 @@
 
-// NOTE: for website time spent maybe have logic that only sites that are visited more then once
-//      or for longer then a user selected time are stored. That way your useage is not clutted
-//      by quick hops
-
-
-// BUG: TODO: I left off trying to get the data to store to the local storage
-//      (this might not be the issue) should check before spending to much time here
-
-
 // ===================================================== \\
 // ===================================================== \\
 //                      Utilities
