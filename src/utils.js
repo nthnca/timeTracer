@@ -1,4 +1,9 @@
 
+
+// TODO: for website time spent maybe have logic that only sites that are visited more then once
+//      or for longer then a user selected time are stored. That way your useage is not clutted
+//      by quick hops
+
 // BEGIN_IMPORT_HERE
 
 // ===================================================== \\
