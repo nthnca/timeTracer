@@ -180,6 +180,53 @@ class UrlDataObj {
 }
 
 
+// ===================================================== \\
+// ===================================================== \\
+//                      Utilities
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Calculates the number of minutes from a given number of milliseconds.
+ *
+ * @param {number} milliseconds - The number of milliseconds.
+ * @returns {number} The number of minutes.
+ */
+function minutesFromMilliseconds(milliseconds) {
+  return milliseconds / (1000 * 60);
+}
+
+/**
+ * Generates an HTML table string from an array of URL objects.
+ * The table includes columns for an example index, the site URL, and the time spent (in hours).
+ * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
+ *
+ * @param {Array<object>} urlList - An array of objects, where each object contains
+ * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
+ * @returns {string} - An HTML string representing a table displaying the URL data.
+ */
+function getUrlListAsTable(urlList) {
+    let display = "<table>";
+    display += "<thead><tr><th>#</th><th>Site Name</th><th>Time Spent</th></tr></thead>";
+    display += "<tbody>";
+
+    // TODO: this needs to formate the time count
+    //  00 min, 00 hour
+    for (let i = 0; i < urlList.length; i++) {
+        const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
+        display += `<tr>`;
+        display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
+        display += `<td>${urlList[i].url}</td>`;
+        display += `<td>${totalHours} hours</td>`;
+        display += `</tr>`;
+    }
+
+    display += "</tbody>";
+    display += "</table>";
+    return display;
+}
+
+
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -269,37 +316,9 @@ async function setSiteObjData(siteDataObj) {
 
 // ===================================================== \\
 // ===================================================== \\
-//                      Utilities
+//                      Main Script
 // ===================================================== \\
 // ===================================================== \\
-
-/**
- * Generates an HTML table string from an array of URL objects.
- * The table includes columns for an example index, the site URL, and the time spent (in hours).
- * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
- *
- * @param {Array<object>} urlList - An array of objects, where each object contains
- * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
- * @returns {string} - An HTML string representing a table displaying the URL data.
- */
-function getUrlListAsTable(urlList) {
-    let display = "<table>";
-    display += "<thead><tr><th>#</th><th>Site Name</th><th>Time Spent</th></tr></thead>";
-    display += "<tbody>";
-
-    for (let i = 0; i < urlList.length; i++) {
-        const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
-        display += `<tr>`;
-        display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
-        display += `<td>${urlList[i].url}</td>`;
-        display += `<td>${totalHours} hours</td>`;
-        display += `</tr>`;
-    }
-
-    display += "</tbody>";
-    display += "</table>";
-    return display;
-}
 
 /**
  * Sets the innerHTML of a specified HTML element by its ID.
@@ -318,12 +337,6 @@ function setHtmlById(htmlId, htmlContent) {
   }
 }
 
-// ===================================================== \\
-// ===================================================== \\
-//                      Main Script
-// ===================================================== \\
-// ===================================================== \\
-
 /**
  * Asynchronously retrieves website tracking data and displays it in an HTML table
  * within the element having the ID 'content-div'.
@@ -334,13 +347,13 @@ function setHtmlById(htmlId, htmlContent) {
  * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
  */
 async function dispayUrlData() {
-    // [ ] get the data on display (live update???)
+    // get the data on display (live update???)
     let data = await getSiteObjData();
 
-    // [ ] format the data
+    // format the data
     let html = getUrlListAsTable(data.urlList);
 
-    // [ ] inject the data
+    // inject the data
     setHtmlById('content-div', html);
 }
 
