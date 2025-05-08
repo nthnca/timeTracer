@@ -60,6 +60,7 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
+        console.log(`LOG - Tracking starts for ${url}`)
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -78,15 +79,20 @@ class UrlDataObj {
     * allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
+            return; // if null nothing to add or update
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
         const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
 
+        // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
 
         } else {
             // TODO: update tests to cover this case
@@ -95,7 +101,9 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             })
+            console.log(`LOG - ${this.activeUrl} added to urlList`)
         }
+
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -269,7 +277,8 @@ async function storeChromeLocalData(key, data) {
         if (chrome.runtime.lastError) {
             console.error('Error saving to local storage:', chrome.runtime.lastError);
         } else {
-            console.log(`Stored - key: ${key}, value: ${data}`);
+            console.log(`LOG - Stored: key: ${key}`);
+            //console.log(`LOG - Stored: key: ${key}, value: ${data}`);
         }
     });
 }
@@ -286,7 +295,8 @@ async function storeChromeLocalData(key, data) {
 async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
-        console.log(`retrieve - key: ${key}, value: ${result[key]}`);
+        //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
+        console.log(`LOG - retrieve: key: ${key}`);
         return result[key];
 
     } catch (error) {
@@ -377,7 +387,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
         updateStoredData(activeUrl, false);
-        console.log("URL changed: " + activeUrl); // DEBUG:
+        console.log("LOG - URL changed: " + activeUrl); // DEBUG:
     }
 });
 
@@ -393,18 +403,18 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
         updateStoredData(activeUrl, false);
-        console.log("Active Tab URL: ", activeUrl); // DEBUG:
+        console.log("LOG - Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
 
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
-        console.log("All Chrome windows are now unfocused.");
+        console.log("LOG - All Chrome windows are now unfocused.");
         updateStoredData("", true);
 
     } else {
-        console.log(`Chrome window with ID ${windowId} is now focused.`);
+        console.log(`LOG - Chrome window with ID ${windowId} is now focused.`);
 
         // When focused, query for the active tab in the currently focused window.
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -412,10 +422,10 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                 const activeTab = tabs[0];
                 const activeUrl = cleanUrl(activeTab.url);
 
-                console.log("Active Tab URL on focus:", activeUrl);
+                console.log("LOG - Active Tab URL on focus:", activeUrl);
                 updateStoredData(activeUrl, false); // Start tracking the newly active URL
             } else {
-                console.log("No active tab found in the newly focused window.");
+                console.log("LOG - No active tab found in the newly focused window.");
             }
         });
     }

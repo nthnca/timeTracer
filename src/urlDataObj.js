@@ -62,6 +62,7 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
+        console.log(`LOG - Tracking starts for ${url}`)
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -80,15 +81,20 @@ class UrlDataObj {
     * allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
+            return; // if null nothing to add or update
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
         const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
 
+        // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
 
         } else {
             // TODO: update tests to cover this case
@@ -97,7 +103,9 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             })
+            console.log(`LOG - ${this.activeUrl} added to urlList`)
         }
+
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -319,7 +327,9 @@ function test_startSession_newSession() {
     const testTime = new Date(2024, 0, 7, 10, 0, 0, 0); // Example: January 7, 2024, 10:00 AM
 
     // exercise
+    muteConsole();
     trackerObj.startSession(testUrl, testTime);
+    unmuteConsole();
 
     // check / test
     const newStartTime = trackerObj.startTime;
@@ -378,7 +388,9 @@ function test_endSession_basic() {
     const expectedElapsedTime = (endTime - trackerObj.startTime) + 4; // in milli sec
 
     // Exercise
+    muteConsole();
     trackerObj.endSession(endTime);
+    unmuteConsole();
 
     // Check / Test
     const endedSessionUrl = trackerObj.activeUrl;
