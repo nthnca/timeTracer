@@ -243,7 +243,6 @@ function getUrlListAsTable(urlList) {
     display += "<tbody>";
 
     for (let i = 0; i < urlList.length; i++) {
-        //const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
         const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)

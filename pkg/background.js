@@ -198,7 +198,8 @@ class UrlDataObj {
  * object to the provided target URL.  It returns the index of the first object where the URLs match.
  *
  * @param {string} targetUrl - The URL to search for.
- * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url' property (string).
+ * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url'
+ *      property (string).
  * @returns {number} The index of the object with the matching URL, or -1 if no match is found.
  *
  * @example
@@ -223,11 +224,13 @@ function searchDataUrls(targetUrl, dataList) {
 /**
  * Cleans and simplifies a URL string.
  *
- * This function takes a URL string, removes any path, query parameters, or hash fragments,
- * and optionally removes the "https://" protocol. It returns the cleaned URL origin.
+ * This function takes a URL string, removes any path, query parameters, or
+ *  hash fragments, and optionally removes the "https://" protocol. It returns
+ *  the cleaned URL origin.
  *
  * @param {string} url - The URL string to clean.
- * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or null if the URL is invalid or empty.
+ * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or
+ *      null if the URL is invalid or empty.
  *
  * @example
  * // Returns "example.com"
@@ -256,6 +259,18 @@ function cleanUrl(url) {
         return null;
     }
 }
+
+/**
+ * @fileoverview This script contains functions that interact with the Chrome
+ * extension APIs for managing and retrieving website tracking data from
+ * local storage. It also sets up event listeners to track URL changes,
+ * active tab changes, and Chrome window focus changes to update the stored data.
+ *
+ * NOTE: all code in this file has no automated tests (this code is not easily tested).
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
 
 // ==================================================== \\
 // ==================================================== \\
