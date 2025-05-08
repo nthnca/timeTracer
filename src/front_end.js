@@ -1,3 +1,14 @@
+/**
+ * @fileoverview This script contains the entry point for displaying website
+ * time tracking data. It fetches the data and renders it as an HTML table
+ * within the 'content-div' element of the DOM.
+ *
+ * NOTE: all code in this file has no automated tests.
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
+
 
 
 

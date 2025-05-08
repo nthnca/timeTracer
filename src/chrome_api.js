@@ -1,4 +1,16 @@
 
+/**
+ * @fileoverview This script contains functions that interact with the Chrome
+ * extension APIs for managing and retrieving website tracking data from
+ * local storage. It also sets up event listeners to track URL changes,
+ * active tab changes, and Chrome window focus changes to update the stored data.
+ *
+ * NOTE: all code in this file has no automated tests.
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
+
 // ADD_TO_FRONT_END_START
 
 // ==================================================== \\

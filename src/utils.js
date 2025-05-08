@@ -1,4 +1,13 @@
 
+/**
+ * @fileoverview This file contains various utility functions used throughout the
+ * application. These functions include URL manipulation (cleaning), data
+ * searching within arrays, and time format conversions (milliseconds to minutes,
+ * milliseconds to hours and minutes). And the tests for said utility functions.
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
 
 // TODO: for website time spent maybe have logic that only sites that are visited more then once
 //      or for longer then a user selected time are stored. That way your usage is not clutted
@@ -21,7 +30,8 @@
  * object to the provided target URL.  It returns the index of the first object where the URLs match.
  *
  * @param {string} targetUrl - The URL to search for.
- * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url' property (string).
+ * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url'
+ *      property (string).
  * @returns {number} The index of the object with the matching URL, or -1 if no match is found.
  *
  * @example
@@ -46,11 +56,13 @@ function searchDataUrls(targetUrl, dataList) {
 /**
  * Cleans and simplifies a URL string.
  *
- * This function takes a URL string, removes any path, query parameters, or hash fragments,
- * and optionally removes the "https://" protocol. It returns the cleaned URL origin.
+ * This function takes a URL string, removes any path, query parameters, or
+ *  hash fragments, and optionally removes the "https://" protocol. It returns
+ *  the cleaned URL origin.
  *
  * @param {string} url - The URL string to clean.
- * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or null if the URL is invalid or empty.
+ * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or
+ *      null if the URL is invalid or empty.
  *
  * @example
  * // Returns "example.com"
@@ -141,7 +153,6 @@ function getUrlListAsTable(urlList) {
     display += "<tbody>";
 
     for (let i = 0; i < urlList.length; i++) {
-        //const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
         const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
@@ -203,13 +214,13 @@ async function runAllTests() {
     passRate += searchDataUrls_notFound();
     testCount += 2;
 
-    testCount += 3;
     passRate += cleanUrl_basicReddit();
     passRate += cleanUrl_basicGoogleMail();
     passRate += cleanUrl_basicGoogleGemini();
+    testCount += 3;
 
-    testCount += 1;
     passRate += testGetUrlListDisplay_basic();
+    testCount += 1;
 
     passRate += minutesFromMilliseconds_basic();
     testCount += 1;
@@ -217,7 +228,6 @@ async function runAllTests() {
     passRate += testFormatMillisecsToHoursAndMinutes_exactHour();
     passRate += testFormatMillisecsToHoursAndMinutes_onlyMinutes();
     passRate += testFormatMillisecsToHoursAndMinutes_hoursAndMinutes();
-
     passRate += testFormatMillisecsToHoursAndMinutes_zeroMilliseconds();
     passRate += testFormatMillisecsToHoursAndMinutes_invalidNull();
     passRate += testFormatMillisecsToHoursAndMinutes_negativeInput();
