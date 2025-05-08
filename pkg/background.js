@@ -53,14 +53,12 @@ class UrlDataObj {
     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
-            // TODO: write a test for this path
             console.error("Error: startTime / activeUrl should never be true on enter ",
                 "old startTime: ", this.startTime,
                 "old activeUrl: ", this.activeUrl,
                 "new startTime: ", currentTime,
                 "new activeUrl: ", url
             );
-            return false;
         }
 
         this.activeUrl = url;
@@ -82,7 +80,6 @@ class UrlDataObj {
     endSession(currentTime = new Date()) {
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
-            return false;
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
