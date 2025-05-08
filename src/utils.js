@@ -99,7 +99,37 @@ function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
 }
 
-// END_IMPORT_HERE
+/**
+ * Generates an HTML table string from an array of URL objects.
+ * The table includes columns for an example index, the site URL, and the time spent (in hours).
+ * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
+ *
+ * @param {Array<object>} urlList - An array of objects, where each object contains
+ * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
+ * @returns {string} - An HTML string representing a table displaying the URL data.
+ */
+function getUrlListAsTable(urlList) {
+    let display = "<table>";
+    display += "<thead><tr><th>#</th><th>Site Name</th><th>Time Spent</th></tr></thead>";
+    display += "<tbody>";
+
+    // TODO: this needs to formate the time count
+    //  00 min, 00 hour
+    for (let i = 0; i < urlList.length; i++) {
+        const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
+        display += `<tr>`;
+        display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
+        display += `<td>${urlList[i].url}</td>`;
+        display += `<td>${totalHours} hours</td>`;
+        display += `</tr>`;
+    }
+
+    display += "</tbody>";
+    display += "</table>";
+    return display;
+}
+
+// ADD_TO_FRONT_END_END
 
 // ===================================================== \\
 // ===================================================== \\
@@ -157,6 +187,10 @@ async function runAllTests() {
 
     testCount += 1;
     passRate += minutesFromMilliseconds_basic();
+    console.log();
+
+    testCount += 1;
+    passRate += testGetUrlListDisplay_basic();
     console.log();
 
     console.log(`Utils - Total Pass Rate --------------------- ${passRate}/${testCount} `)
@@ -303,6 +337,56 @@ function minutesFromMilliseconds_basic() {
         return 1;
     } else {
         console.log(`minutesFromMilliseconds --------------------- ❗ `);
+        return 0;
+    }
+}
+
+function testGetUrlListDisplay_basic() {
+    // setup
+    const testData = {
+        activeUrl: null,
+        startTime: null,
+        urlList: [
+            { url: "reddit.com", totalTime: 0},
+            { url: "google.com", totalTime: 0}
+        ],
+    };
+    const expectedOutput = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Site Name</th>
+              <th>Time Spent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>reddit.com</td>
+              <td>0.00 hours</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>google.com</td>
+              <td>0.00 hours</td>
+            </tr>
+          </tbody>
+        </table>
+    `.split('\n').map(line => line.trim()).filter(line => line !== '').join(''); // removes the newlines and tabs
+
+    // exercise
+    const actualOutput = getUrlListAsTable(testData.urlList);
+
+    // check / test
+    if (actualOutput === expectedOutput) {
+        console.log(`testGetUrlListDisplay_basic ----------------- ✔️`);
+        return 1;
+    } else {
+        console.log(`testGetUrlListDisplay_basic ----------------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log()
+        console.log(`Actual:   "${actualOutput}"`);
         return 0;
     }
 }
