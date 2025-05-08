@@ -220,7 +220,13 @@ async function runAllTests() {
     console.log();
 
     passRate += testFormatMillisecsToHoursAndMinutes_exactHour();
-    testCount += 1;
+    passRate += testFormatMillisecsToHoursAndMinutes_onlyMinutes();
+    passRate += testFormatMillisecsToHoursAndMinutes_hoursAndMinutes();
+
+    passRate += testFormatMillisecsToHoursAndMinutes_zeroMilliseconds();
+    passRate += testFormatMillisecsToHoursAndMinutes_invalidNull();
+    passRate += testFormatMillisecsToHoursAndMinutes_negativeInput();
+    testCount += 6;
     console.log();
 
     console.log(`Utils - Total Pass Rate ----------------------------- ${passRate}/${testCount} `)
@@ -441,3 +447,77 @@ function testFormatMillisecsToHoursAndMinutes_exactHour() {
     }
 }
 
+function testFormatMillisecsToHoursAndMinutes_onlyMinutes() {
+    const testData = 1800000; // 30 minutes
+    const expectedOutput = "30 min";
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    if (actualOutput === expectedOutput) {
+        console.log(`formatMillisecsToHoursAndMinutes (30 min) ----------- ✔️`);
+        return 1;
+    } else {
+        console.log(`formatMillisecsToHoursAndMinutes (30 min) ----------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testFormatMillisecsToHoursAndMinutes_hoursAndMinutes() {
+    const testData = 7500000; // 2 hours and 5 minutes
+    const expectedOutput = "2 hr, 5 min";
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    if (actualOutput === expectedOutput) {
+        console.log(`formatMillisecsToHoursAndMinutes (2 hr, 5 min) ------ ✔️`);
+        return 1;
+    } else {
+        console.log(`formatMillisecsToHoursAndMinutes (2 hr, 5 min) ------ ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testFormatMillisecsToHoursAndMinutes_zeroMilliseconds() {
+    const testData = 0;
+    const expectedOutput = "0 min";
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    if (actualOutput === expectedOutput) {
+        console.log(`formatMillisecsToHoursAndMinutes (0 ms) ------------- ✔️`);
+        return 1;
+    } else {
+        console.log(`formatMillisecsToHoursAndMinutes (0 ms) ------------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testFormatMillisecsToHoursAndMinutes_invalidNull() {
+    const testData = null;
+    const expectedOutput = "0 min";
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    if (actualOutput === expectedOutput) {
+        console.log(`formatMillisecsToHoursAndMinutes (null) ------------- ✔️`);
+        return 1;
+    } else {
+        console.log(`formatMillisecsToHoursAndMinutes (null) ------------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testFormatMillisecsToHoursAndMinutes_negativeInput() {
+    const testData = -1000;
+    const expectedOutput = "0 min";
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    if (actualOutput === expectedOutput) {
+        console.log(`formatMillisecsToHoursAndMinutes (negative) --------- ✔️`);
+        return 1;
+    } else {
+        console.log(`formatMillisecsToHoursAndMinutes (negative) --------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
