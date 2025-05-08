@@ -79,6 +79,15 @@ function cleanUrl(url) {
         return null;
     }
 }
+// END_IMPORT_HERE
+
+// ADD_TO_FRONT_END_START
+
+// ===================================================== \\
+// ===================================================== \\
+//                      Utilities
+// ===================================================== \\
+// ===================================================== \\
 
 /**
  * Calculates the number of minutes from a given number of milliseconds.

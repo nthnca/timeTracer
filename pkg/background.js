@@ -252,17 +252,6 @@ function cleanUrl(url) {
     }
 }
 
-/**
- * Calculates the number of minutes from a given number of milliseconds.
- *
- * @param {number} milliseconds - The number of milliseconds.
- * @returns {number} The number of minutes.
- */
-function minutesFromMilliseconds(milliseconds) {
-  return milliseconds / (1000 * 60);
-}
-
-
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
