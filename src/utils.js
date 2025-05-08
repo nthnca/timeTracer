@@ -100,6 +100,33 @@ function minutesFromMilliseconds(milliseconds) {
 }
 
 /**
+ * Converts a given number of milliseconds into hours and minutes.
+ *
+ * @param {number} miliSecs - The total number of milliseconds.
+ * @returns {string} A string representing the time in "X hr, Y min" format.
+ * Returns "0 minutes" if the input is invalid.
+ */
+function formatMillisecsToHoursAndMinutes(miliSecs) {
+    let minutes = minutesFromMilliseconds(miliSecs);
+
+    // Input validation: Check if minutes is a valid number and is not negative
+    if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
+        return "0 min";
+    }
+
+    const hours = Math.trunc(minutes / 60);
+    const remainingMinutes = Math.trunc(minutes % 60);
+
+    if (hours === 0) {
+        return `${remainingMinutes} min`;
+    } else if (remainingMinutes === 0) {
+        return `${hours} hr`;
+    } else {
+        return `${hours} hr, ${remainingMinutes} min`;
+    }
+}
+
+/**
  * Generates an HTML table string from an array of URL objects.
  * The table includes columns for an example index, the site URL, and the time spent (in hours).
  * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
@@ -113,14 +140,13 @@ function getUrlListAsTable(urlList) {
     display += "<thead><tr><th>#</th><th>Site Name</th><th>Time Spent</th></tr></thead>";
     display += "<tbody>";
 
-    // TODO: this needs to formate the time count
-    //  00 min, 00 hour
     for (let i = 0; i < urlList.length; i++) {
-        const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
+        //const totalHours = (urlList[i].totalTime / (1000 * 60 * 60)).toFixed(2); // Assuming totalTime is in milliseconds
+        const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
         display += `<td>${urlList[i].url}</td>`;
-        display += `<td>${totalHours} hours</td>`;
+        display += `<td>${totalTime}</td>`;
         display += `</tr>`;
     }
 
@@ -364,12 +390,12 @@ function testGetUrlListDisplay_basic() {
             <tr>
               <td>1</td>
               <td>reddit.com</td>
-              <td>0.00 hours</td>
+              <td>0 min</td>
             </tr>
             <tr>
               <td>2</td>
               <td>google.com</td>
-              <td>0.00 hours</td>
+              <td>0 min</td>
             </tr>
           </tbody>
         </table>
