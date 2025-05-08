@@ -234,7 +234,8 @@ async function runAllTests() {
     // TODO: add a test to ensure that the totalTime += works right
     // TODO: add a test to ensure that the if item not exists errors right
     passRate += test_endSession_basic();
-    testCount += 1;
+    passRate += test_endSession_nullActiveUrl();
+    testCount += 2;
 
     passRate += calcTimeElapsed_minutes();
     passRate += calcTimeElapsed_hours();
@@ -399,6 +400,27 @@ function test_endSession_basic() {
         console.log("targetItem:            ", !!targetItem);
         console.log("targetItem.totalTime:  ", targetItem.totalTime === expectedElapsedTime);
         console.log("targetItem.startDate   ", trackerObj.startTime === null);
+        return 0;
+    }
+}
+
+function test_endSession_nullActiveUrl() {
+    // Setup
+    const trackerObj = new UrlDataObj();
+
+    // Exercise
+    muteConsole();
+    trackerObj.endSession();
+    unmuteConsole();
+
+    // Check / Test
+    if (trackerObj.urlList.length === 0 && trackerObj.activeUrl === null && trackerObj.startTime === null) {
+        return 1;
+    } else {
+        console.log(`test_endSession_nullActiveUrl ----------------------- ❗ `);
+        console.log("urlList.length:", trackerObj.urlList.length);
+        console.log("activeUrl:", trackerObj.activeUrl);
+        console.log("startTime:", trackerObj.startTime);
         return 0;
     }
 }
