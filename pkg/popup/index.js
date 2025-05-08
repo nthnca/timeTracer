@@ -80,6 +80,7 @@ class UrlDataObj {
     endSession(currentTime = new Date()) {
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
+            return; // if null nothing to add or update
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
