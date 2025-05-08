@@ -1,13 +1,13 @@
 
-// TODO:
-//      __MVP__
-//      [ ] get the data on display (live update???)
-//      [ ] format the data
-//      [ ] inject the data
-//
-//      __after__
-//      [ ] allow cleaing of data (with confirm msg)
-//      [ ] pause collection
+
+
+//  TODO: [ ] - DOCUMENTATION -- add file commnets to each js file also add a smaller
+//      but similer to the readme layout
+//  TODO: [ ] - MAINTENANCE -- clean up console logs for better more clean issue logging
+//  TODO: [ ] - FEATURE -- add a button to clear / reset all local data (check the chrome API)
+//  TODO: [ ] - FEATURE -- add % of total time spent on each site (later)
+//  TODO: [ ] - FEATURE -- get the data on display (live update???)
+//  TODO: [ ] - FEATURE -- allow pausing of tracking
 
 // BEGIN_IMPORT_HERE
 
