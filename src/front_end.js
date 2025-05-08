@@ -1,13 +1,18 @@
 
 
 
-//  TODO: [ ] - DOCUMENTATION -- add file commnets to each js file also add a smaller
+//  TODO: - DOCUMENTATION -- add file commnets to each js file also add a smaller
 //      but similer to the readme layout
-//  TODO: [ ] - MAINTENANCE -- clean up console logs for better more clean issue logging
-//  TODO: [ ] - FEATURE -- add a button to clear / reset all local data (check the chrome API)
-//  TODO: [ ] - FEATURE -- add % of total time spent on each site (later)
-//  TODO: [ ] - FEATURE -- get the data on display (live update???)
-//  TODO: [ ] - FEATURE -- allow pausing of tracking
+//  TODO: - MAINTENANCE -- clean up console logs for better more clean issue logging
+//  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
+//  TODO: - FEATURE -- add a button to clear / reset all local data (check the chrome API)
+//  TODO: - FEATURE -- add % of total time spent on each site (later)
+//  TODO: - FEATURE -- get the data on display (live update???)
+//  TODO: - FEATURE -- allow pausing of tracking
+//  TODO: - FEATURE -- store dates in a obj and use dates as the key for a days url tracking
+//          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
+//          local this will be easy to clean up and check if days need to be cleaned
+//  TODO: - MAINTENANCE -- add a log for each time a URL is focused / unfocused and log the time spent
 
 // BEGIN_IMPORT_HERE
 
