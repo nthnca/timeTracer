@@ -198,26 +198,21 @@ function unmuteConsole() {
 async function runAllTests() {
     let testCount = 0;
     let passRate = 0;
-    console.log("\n------ ---- ---- ----- - utils  - ----- ---- ---- ------")
 
     passRate += searchDataUrls_found();
     passRate += searchDataUrls_notFound();
     testCount += 2;
-    console.log();
 
     testCount += 3;
     passRate += cleanUrl_basicReddit();
     passRate += cleanUrl_basicGoogleMail();
     passRate += cleanUrl_basicGoogleGemini();
-    console.log();
 
     testCount += 1;
     passRate += testGetUrlListDisplay_basic();
-    console.log();
 
     passRate += minutesFromMilliseconds_basic();
     testCount += 1;
-    console.log();
 
     passRate += testFormatMillisecsToHoursAndMinutes_exactHour();
     passRate += testFormatMillisecsToHoursAndMinutes_onlyMinutes();
@@ -227,9 +222,8 @@ async function runAllTests() {
     passRate += testFormatMillisecsToHoursAndMinutes_invalidNull();
     passRate += testFormatMillisecsToHoursAndMinutes_negativeInput();
     testCount += 6;
-    console.log();
 
-    console.log(`Utils - Total Pass Rate ----------------------------- ${passRate}/${testCount} `)
+    console.log(`Utils - Total Pass Rate ------------------------- ${passRate}/${testCount} `)
 }
 
 runAllTests();
@@ -266,7 +260,6 @@ function searchDataUrls_found() {
     // check / test
     if (index == 0) {
         // pass if the string match is found in obj at index 0
-        console.log(`searchDataUrls_found -------------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`searchDataUrls_found -------------------------------- ❗ `);
@@ -293,7 +286,6 @@ function searchDataUrls_notFound() {
     // check / test
     if (index == -1) {
         // pass if the string match is not found in list (-1 return)
-        console.log(`searchDataUrls_notFound ----------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`searchDataUrls_notFound ----------------------------- ❗ `);
@@ -315,7 +307,6 @@ function cleanUrl_basicReddit() {
 
     // check / test
     if (cleanedUrl == "www.reddit.com") {
-        console.log(`cleanUrl_basicReddit -------------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`cleanUrl_basicReddit -------------------------------- ❗ `);
@@ -333,7 +324,6 @@ function cleanUrl_basicGoogleMail() {
 
     // check / test
     if (cleanedUrl == "mail.google.com") {
-        console.log(`cleanUrl_basicGoogleMail ---------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`cleanUrl_basicGoogleMail ---------------------------- ❗ `);
@@ -351,7 +341,6 @@ function cleanUrl_basicGoogleGemini() {
 
     // check / test
     if (cleanedUrl == "gemini.google.com") {
-        console.log(`cleanUrl_basicGoogleGemini -------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`cleanUrl_basicGoogleGemini -------------------------- ❗ `);
@@ -369,7 +358,6 @@ function minutesFromMilliseconds_basic() {
 
     // check / test
     if (time == 10) { // should come to 10 minutes
-        console.log(`minutesFromMilliseconds ----------------------------- ✔️ `);
         return 1;
     } else {
         console.log(`minutesFromMilliseconds ----------------------------- ❗ `);
@@ -416,7 +404,6 @@ function testGetUrlListDisplay_basic() {
 
     // check / test
     if (actualOutput === expectedOutput) {
-        console.log(`testGetUrlListDisplay_basic ------------------------- ✔️`);
         return 1;
     } else {
         console.log(`testGetUrlListDisplay_basic ------------------------- ❗`);
@@ -437,7 +424,6 @@ function testFormatMillisecsToHoursAndMinutes_exactHour() {
 
     // check / test
     if (actualOutput === expectedOutput) {
-        console.log(`testFormatMillisecsToHoursAndMinutes_exactHour ------ ✔️`);
         return 1;
     } else {
         console.log(`testFormatMillisecsToHoursAndMinutes_exactHour ------ ❗`);
@@ -452,7 +438,6 @@ function testFormatMillisecsToHoursAndMinutes_onlyMinutes() {
     const expectedOutput = "30 min";
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
     if (actualOutput === expectedOutput) {
-        console.log(`formatMillisecsToHoursAndMinutes (30 min) ----------- ✔️`);
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (30 min) ----------- ❗`);
@@ -467,7 +452,6 @@ function testFormatMillisecsToHoursAndMinutes_hoursAndMinutes() {
     const expectedOutput = "2 hr, 5 min";
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
     if (actualOutput === expectedOutput) {
-        console.log(`formatMillisecsToHoursAndMinutes (2 hr, 5 min) ------ ✔️`);
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (2 hr, 5 min) ------ ❗`);
@@ -482,7 +466,6 @@ function testFormatMillisecsToHoursAndMinutes_zeroMilliseconds() {
     const expectedOutput = "0 min";
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
     if (actualOutput === expectedOutput) {
-        console.log(`formatMillisecsToHoursAndMinutes (0 ms) ------------- ✔️`);
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (0 ms) ------------- ❗`);
@@ -497,7 +480,6 @@ function testFormatMillisecsToHoursAndMinutes_invalidNull() {
     const expectedOutput = "0 min";
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
     if (actualOutput === expectedOutput) {
-        console.log(`formatMillisecsToHoursAndMinutes (null) ------------- ✔️`);
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (null) ------------- ❗`);
@@ -512,7 +494,6 @@ function testFormatMillisecsToHoursAndMinutes_negativeInput() {
     const expectedOutput = "0 min";
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
     if (actualOutput === expectedOutput) {
-        console.log(`formatMillisecsToHoursAndMinutes (negative) --------- ✔️`);
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (negative) --------- ❗`);
