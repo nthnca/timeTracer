@@ -1,7 +1,8 @@
 /**
- * @fileoverview This script contains the entry point for displaying website
- * time tracking data. It fetches the data and renders it as an HTML table
- * within the 'content-div' element of the DOM.
+ * @fileoverview This files has the front-end code that interacts
+ * with the DOM (Not easily tested).
+ * As well as the entry point for displaying the data for each website
+ * and its time data.
  *
  * NOTE: all code in this file has no automated tests.
  *
@@ -12,9 +13,6 @@
 
 
 
-//  TODO: - DOCUMENTATION -- add file commnets to each js file also add a smaller
-//      but similer to the readme layout
-//
 //  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
 //
 //  TODO: - FEATURE -- add a button to clear / reset all local data (check the chrome API)
@@ -24,6 +22,14 @@
 //  TODO: - FEATURE -- store dates in a obj and use dates as the key for a days url tracking
 //          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
 //          local this will be easy to clean up and check if days need to be cleaned
+
+
+
+// TODO: for website time spent maybe have logic that only sites that are visited more then once
+//      or for longer then a user selected time are stored. That way your usage is not clutted
+//      by quick hops
+// TODO: added the key to urlData in local as the date for the day it was collected, this way
+//      time spent can be tracked per day
 
 // BEGIN_IMPORT_HERE
 

@@ -1,19 +1,14 @@
 
 /**
- * @fileoverview This file contains various utility functions used throughout the
- * application. These functions include URL manipulation (cleaning), data
- * searching within arrays, and time format conversions (milliseconds to minutes,
- * milliseconds to hours and minutes). And the tests for said utility functions.
+ * @fileoverview This file contains various utility functions (the bulk of the code)
+ * used throughout the application. These functions include URL manipulation
+ * (cleaning), data searching within arrays, and time format conversions
+ * (milliseconds to minutes, milliseconds to hours and minutes). And the tests
+ * for said utility functions.
  *
  * @author: Calvin Bullock
  * @date Date of creation: April, 2025
  */
-
-// TODO: for website time spent maybe have logic that only sites that are visited more then once
-//      or for longer then a user selected time are stored. That way your usage is not clutted
-//      by quick hops
-// TODO: added the key to urlData in local as the date for the day it was collected, this way
-//      time spent can be tracked per day
 
 // BEGIN_IMPORT_HERE
 

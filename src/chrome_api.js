@@ -5,7 +5,7 @@
  * local storage. It also sets up event listeners to track URL changes,
  * active tab changes, and Chrome window focus changes to update the stored data.
  *
- * NOTE: all code in this file has no automated tests.
+ * NOTE: all code in this file has no automated tests (this code is not easily tested).
  *
  * @author: Calvin Bullock
  * @date Date of creation: April, 2025

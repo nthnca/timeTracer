@@ -14,8 +14,8 @@
 - [ ] should build and run .sh be one file??
 
 ## file layout
-- pkg/      -- The final code to run the extension
-- src/      -- The tests and vanilla .js code, seperated from the chrome API code]
+- pkg/      -- The code in it's production script files
+- src/      -- The source code in its files for testing and building
 - test.sh   -- This will run all the test files / scripts
 - build.sh  -- This will parse all my src files into the production script files
 - watch.sh  --  TODO: this is similar to nodemon, it will watch the src files and rebuild production on change
