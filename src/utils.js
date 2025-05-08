@@ -416,3 +416,24 @@ function testGetUrlListDisplay_basic() {
         return 0;
     }
 }
+
+function testFormatMillisecsToHoursAndMinutes_exactHour() {
+    // setup
+    const testData = 3600000;
+    const expectedOutput = "1 hr";
+
+    // exercise
+    const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+
+    // check / test
+    if (actualOutput === expectedOutput) {
+        console.log(`testFormatMillisecsToHoursAndMinutes_exactHour ------ ✔️`);
+        return 1;
+    } else {
+        console.log(`testFormatMillisecsToHoursAndMinutes_exactHour ------ ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
