@@ -198,7 +198,7 @@ function unmuteConsole() {
 async function runAllTests() {
     let testCount = 0;
     let passRate = 0;
-    console.log("\n------ ---- ---- ---- utils ---- ---- ---- ------")
+    console.log("\n------ ---- ---- ----- - utils  - ----- ---- ---- ------")
 
     passRate += searchDataUrls_found();
     passRate += searchDataUrls_notFound();
@@ -212,14 +212,18 @@ async function runAllTests() {
     console.log();
 
     testCount += 1;
-    passRate += minutesFromMilliseconds_basic();
-    console.log();
-
-    testCount += 1;
     passRate += testGetUrlListDisplay_basic();
     console.log();
 
-    console.log(`Utils - Total Pass Rate --------------------- ${passRate}/${testCount} `)
+    passRate += minutesFromMilliseconds_basic();
+    testCount += 1;
+    console.log();
+
+    passRate += testFormatMillisecsToHoursAndMinutes_exactHour();
+    testCount += 1;
+    console.log();
+
+    console.log(`Utils - Total Pass Rate ----------------------------- ${passRate}/${testCount} `)
 }
 
 runAllTests();
@@ -256,10 +260,10 @@ function searchDataUrls_found() {
     // check / test
     if (index == 0) {
         // pass if the string match is found in obj at index 0
-        console.log(`searchDataUrls_found ------------------------ ✔️ `);
+        console.log(`searchDataUrls_found -------------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`searchDataUrls_found ------------------------ ❗ `);
+        console.log(`searchDataUrls_found -------------------------------- ❗ `);
         return 0;
     }
 }
@@ -283,10 +287,10 @@ function searchDataUrls_notFound() {
     // check / test
     if (index == -1) {
         // pass if the string match is not found in list (-1 return)
-        console.log(`searchDataUrls_notFound --------------------- ✔️ `);
+        console.log(`searchDataUrls_notFound ----------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`searchDataUrls_notFound --------------------- ❗ `);
+        console.log(`searchDataUrls_notFound ----------------------------- ❗ `);
         return 0;
     }
 }
@@ -305,10 +309,10 @@ function cleanUrl_basicReddit() {
 
     // check / test
     if (cleanedUrl == "www.reddit.com") {
-        console.log(`cleanUrl_basicReddit ------------------------ ✔️ `);
+        console.log(`cleanUrl_basicReddit -------------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`cleanUrl_basicReddit ------------------------ ❗ `);
+        console.log(`cleanUrl_basicReddit -------------------------------- ❗ `);
         return 0;
     }
 }
@@ -323,10 +327,10 @@ function cleanUrl_basicGoogleMail() {
 
     // check / test
     if (cleanedUrl == "mail.google.com") {
-        console.log(`cleanUrl_basicGoogleMail -------------------- ✔️ `);
+        console.log(`cleanUrl_basicGoogleMail ---------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`cleanUrl_basicGoogleMail -------------------- ❗ `);
+        console.log(`cleanUrl_basicGoogleMail ---------------------------- ❗ `);
         return 0;
     }
 }
@@ -341,10 +345,10 @@ function cleanUrl_basicGoogleGemini() {
 
     // check / test
     if (cleanedUrl == "gemini.google.com") {
-        console.log(`cleanUrl_basicGoogleGemini ------------------ ✔️ `);
+        console.log(`cleanUrl_basicGoogleGemini -------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`cleanUrl_basicGoogleGemini ------------------ ❗ `);
+        console.log(`cleanUrl_basicGoogleGemini -------------------------- ❗ `);
         return 0;
     }
 }
@@ -359,10 +363,10 @@ function minutesFromMilliseconds_basic() {
 
     // check / test
     if (time == 10) { // should come to 10 minutes
-        console.log(`minutesFromMilliseconds --------------------- ✔️ `);
+        console.log(`minutesFromMilliseconds ----------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`minutesFromMilliseconds --------------------- ❗ `);
+        console.log(`minutesFromMilliseconds ----------------------------- ❗ `);
         return 0;
     }
 }
@@ -406,10 +410,10 @@ function testGetUrlListDisplay_basic() {
 
     // check / test
     if (actualOutput === expectedOutput) {
-        console.log(`testGetUrlListDisplay_basic ----------------- ✔️`);
+        console.log(`testGetUrlListDisplay_basic ------------------------- ✔️`);
         return 1;
     } else {
-        console.log(`testGetUrlListDisplay_basic ----------------- ❗`);
+        console.log(`testGetUrlListDisplay_basic ------------------------- ❗`);
         console.log(`Expected: "${expectedOutput}"`);
         console.log()
         console.log(`Actual:   "${actualOutput}"`);

@@ -222,7 +222,7 @@ function unmuteConsole() {
 async function runAllTests() {
     let testCount = 0;
     let passRate = 0;
-    console.log("\n\n------ ---- ---- - urlDataObj  - ---- ---- ------")
+    console.log("\n\n------ ---- ---- ----- urlDataObj ----- ---- ---- ------")
 
     passRate += test_appendListItem_basic();
     passRate += test_AppendListItem_existing();
@@ -253,7 +253,7 @@ async function runAllTests() {
     testCount += 3;
     console.log()
 
-    console.log(`urlDataObj - Total Pass Rate ---------------- ${passRate}/${testCount} `)
+    console.log(`urlDataObj - Total Pass Rate ------------------------ ${passRate}/${testCount} `)
 }
 
 runAllTests();
@@ -286,10 +286,10 @@ function test_appendListItem_basic() {
         && itemUrl == urlToAppend
         && itemTime == 0
     ) {
-        console.log(`test_appendListItem_basic ------------------- ✔️ `);
+        console.log(`test_appendListItem_basic --------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_appendListItem_basic ------------------- ❗ `);
+        console.log(`test_appendListItem_basic --------------------------- ❗ `);
         return 0;
     }
 }
@@ -310,10 +310,10 @@ function test_AppendListItem_existing() {
     const finalLength = trackerObj.urlList.length;
 
     if ( result === false && finalLength === initialLength ) {
-        console.log(`test_AppendListItem_existing ---------------- ✔️ `);
+        console.log(`test_AppendListItem_existing ------------------------ ✔️ `);
         return 1;
     } else {
-        console.log(`test_AppendListItem_existing ---------------- ❗ `);
+        console.log(`test_AppendListItem_existing ------------------------ ❗ `);
         return 0;
     }
 }
@@ -335,10 +335,10 @@ function test_startSession_newSession() {
     if (newStartTime === testTime
         && newActiveUrl === testUrl
     ) {
-        console.log(`test_startSession_newSession ---------------- ✔️ `);
+        console.log(`test_startSession_newSession ------------------------ ✔️ `);
         return 1;
     } else {
-        console.log(`test_startSession_newSession ---------------- ❗ `);
+        console.log(`test_startSession_newSession ------------------------ ❗ `);
         console.log("newStartTime === testTime:", newStartTime === testTime, newStartTime);
         console.log("newActiveUrl === testUrl: ", newActiveUrl === testUrl, newActiveUrl);
         return 0;
@@ -363,10 +363,10 @@ function test_startSession_existingSession() {
     // check / test
 
     if (!result) { // did we error
-        console.log(`test_startSession_existingSession ----------- ✔️ `);
+        console.log(`test_startSession_existingSession ------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_startSession_existingSession ----------- ❗ `);
+        console.log(`test_startSession_existingSession ------------------- ❗ `);
         return 0;
     }
 }
@@ -401,10 +401,10 @@ function test_endSession_basic() {
         targetItem.totalTime === expectedElapsedTime &&
         trackerObj.startTime === null
     ) {
-        console.log(`test_endSession_basic ----------------------- ✔️ `);
+        console.log(`test_endSession_basic ------------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_endSession_basic ----------------------- ❗ `);
+        console.log(`test_endSession_basic ------------------------------- ❗ `);
         console.log("endedSessionUrl:       ", endedSessionUrl === null);
         console.log("endedSessionStartTime: ", endedSessionStartTime === null);
         console.log("targetItem:            ", !!targetItem);
@@ -426,10 +426,10 @@ function calcTimeElapsed_minutes() {
 
     // check / test
     if (time == 600000) {
-        console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
+        console.log(`calcTimeElapsed_minutes ----------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
+        console.log(`calcTimeElapsed_minutes ----------------------------- ❗ `);
         return 0;
     }
 }
@@ -447,10 +447,10 @@ function calcTimeElapsed_hours() {
     // check / test
     // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
     if (time == 3600000) {
-        console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
+        console.log(`calcTimeElapsed_hours ------------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
+        console.log(`calcTimeElapsed_hours ------------------------------- ❗ `);
         console.log(time);
         return 0;
     }
@@ -473,10 +473,10 @@ function calcTimeElapsed_doubleDate() {
     // check / test
     // error and return null
     if (time == null) {
-        console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
+        console.log(`calcTimeElapsed_doubleDate -------------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
+        console.log(`calcTimeElapsed_doubleDate--------------------------- ❗ `);
         console.log(time);
         return 0;
     }
@@ -501,10 +501,10 @@ function calcTimeElapsed_doubleDateFix() {
 
     // check / test
     if (time == 0) {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
+        console.log(`calcTimeElapsed_doubleDateFix ----------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
+        console.log(`calcTimeElapsed_doubleDateFix ----------------------- ❗ `);
         console.log(time);
         return 0;
     }
@@ -538,10 +538,10 @@ function test_toJSON_basic() {
     });
 
     if (jsonOutput === expectedOutput) { // Direct string comparison
-        console.log(`test_toJSON_basic --------------------------- ✔️ `);
+        console.log(`test_toJSON_basic ----------------------------------- ✔️ `);
         return true;
     } else {
-        console.log(`test_toJSON_basic --------------------------- ❗ `);
+        console.log(`test_toJSON_basic ----------------------------------- ❗ `);
         console.log("Expected Output:", expectedOutput);
         console.log("Actual Output:", jsonOutput);
         return false;
@@ -581,10 +581,10 @@ function test_fromJSONString_basic() {
     const urlListMatch = JSON.stringify(trackerObj.urlList) === JSON.stringify(expectedTrackerObj.urlList);
 
     if (activeUrlMatch && startTimeMatch && urlListMatch) {
-        console.log(`test_fromJSONString_basic ------------------- ✔️ `);
+        console.log(`test_fromJSONString_basic --------------------------- ✔️ `);
         return true;
     } else {
-        console.log(`test_fromJSONString_basic ------------------- ❗ `);
+        console.log(`test_fromJSONString_basic --------------------------- ❗ `);
         console.log("Expected Output:", expectedTrackerObj);
         console.log("Actual Output:", trackerObj);
         return false;
@@ -617,10 +617,10 @@ function test_toJSON_fromJSON_integration() {
     const urlListMatch = JSON.stringify(reconstructedTrackerObj.urlList) === JSON.stringify(originalTrackerObj.urlList);
 
     if (activeUrlMatch && startTimeMatch && urlListMatch) {
-        console.log(`test_toJSON_fromJSON_integration ------------ ✔️ `);
+        console.log(`test_toJSON_fromJSON_integration -------------------- ✔️ `);
         return true;
     } else {
-        console.log(`test_toJSON_fromJSON_integration ------------ ❗ `);
+        console.log(`test_toJSON_fromJSON_integration -------------------- ❗ `);
         console.log("Original Object:", originalTrackerObj);
         console.log("Reconstructed Object:", reconstructedTrackerObj);
         return false;
