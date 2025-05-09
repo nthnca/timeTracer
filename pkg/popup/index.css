@@ -1,5 +1,89 @@
 
+:root {
+    --card-background: #222222;
+    --main-background: #800000;
+    --text-primary-color: white;
+    --active-item-color: green;
+}
+
 body {
-    background: #333300;
-    color: white;
+    background-color: var(--main-background);
+    color: var(--text-primary-color);
+
+    width: 350px;
+    height: 550px;
+
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+    overflow: hidden;
+}
+
+header {
+    background-color: var(--card-background);
+    color: var(--text-primary-color);
+    font-size: 2em;
+    padding: 0.5em 10px;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+nav ul {
+    font-size: 0.6em;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    margin: auto;
+}
+
+nav ul li a {
+    color: var(--text-primary-color);
+    text-decoration: none;
+    padding: 0.3em 0.6em;
+    border-radius: 3px;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+main {
+    padding: 10px;
+    max-width: 330px;
+    height: auto;
+    margin: 10px auto;
+    background-color: var(--card-background);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    font-size: 0.9em;
+    overflow-y: auto;
+}
+
+main p {
+    margin-bottom: 0.8em;
+}
+
+footer {
+    background-color: var(--card-background);
+    color: var(--text-primary-color);
+    text-align: center;
+    padding: 0.5em 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    font-size: 0.7em;
+}
+
+footer p {
+    margin: 0;
 }
