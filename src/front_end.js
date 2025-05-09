@@ -11,9 +11,14 @@
  */
 
 
+// TODO: NEXT
+// TODO: clean up css
+// TODO: show top 10 and allow exspand / scroll
+// TODO: add day by day tracking
 
 
 //  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
+//  TODO: - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
 //
 //  TODO: - FEATURE -- add a button to clear / reset all local data (check the chrome API)
 //  TODO: - FEATURE -- add % of total time spent on each site (later)
@@ -61,8 +66,20 @@ async function dispayUrlData() {
     // get the data on display (live update???)
     let data = await getSiteObjData();
 
+    // sort by highest usage time
+    let sortedUrlList = data.urlList.sort((a, b) => {
+        // Compare the totalTime property of the two objects
+        if (a.totalTime < b.totalTime) {
+            return 1; // a comes before b
+        }
+        if (a.totalTime > b.totalTime) {
+            return -1;  // a comes after b
+        }
+        return 0;    // a and b are equal
+    });
+
     // format the data
-    let html = getUrlListAsTable(data.urlList);
+    let html = getUrlListAsTable(sortedUrlList);
 
     // inject the data
     setHtmlById('content-div', html);

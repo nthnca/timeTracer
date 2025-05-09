@@ -428,8 +428,20 @@ async function dispayUrlData() {
     // get the data on display (live update???)
     let data = await getSiteObjData();
 
+    // sort by highest usage time
+    let sortedUrlList = data.urlList.sort((a, b) => {
+        // Compare the totalTime property of the two objects
+        if (a.totalTime < b.totalTime) {
+            return 1; // a comes before b
+        }
+        if (a.totalTime > b.totalTime) {
+            return -1;  // a comes after b
+        }
+        return 0;    // a and b are equal
+    });
+
     // format the data
-    let html = getUrlListAsTable(data.urlList);
+    let html = getUrlListAsTable(sortedUrlList);
 
     // inject the data
     setHtmlById('content-div', html);
