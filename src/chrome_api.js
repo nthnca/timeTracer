@@ -47,22 +47,32 @@ async function removeChromeLocalStorageItem(key) {
 }
 
 /**
- * Stores data in Chrome's local storage.
+ * Asynchronously stores data in Chrome's local storage.
  *
- * This function saves the provided data under the specified key in Chrome's local storage.
- * It handles potential errors during the storage process and logs the outcome.
+ * This function saves the provided data under the specified key in Chrome's
+ * local storage, returning a Promise that resolves upon successful storage
+ * or rejects if an error occurs. It also logs the outcome of the storage
+ * operation to the console.
  *
+ * @async
+ * @function storeChromeLocalData
  * @param {string} key - The key under which to store the data.
- * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
+ * @param {any} data - The data to be stored. This can be any JavaScript
+ * object that is serializable.
+ * @returns {Promise<void>} A Promise that resolves when the data is
+ * successfully stored, or rejects if an error occurs.
  */
 async function storeChromeLocalData(key, data) {
-    chrome.storage.local.set({ [key]: data}, function() {
-        if (chrome.runtime.lastError) {
-            console.error('Error saving to local storage:', chrome.runtime.lastError);
-        } else {
-            console.log(`LOG - Stored: key: ${key}`);
-            //console.log(`LOG - Stored: key: ${key}, value: ${data}`);
-        }
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({ [key]: data}, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Error saving to local storage:', chrome.runtime.lastError);
+                reject(chrome.runtime.lastError); // Indicate failure with the error
+            } else {
+                console.log(`LOG - Stored: key: ${key}`);
+                resolve(); // Indicate successful completion
+            }
+        });
     });
 }
 
