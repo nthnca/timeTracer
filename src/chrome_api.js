@@ -20,6 +20,33 @@
 // ==================================================== \\
 
 /**
+ * Asynchronously removes a single item from the Chrome extension's local storage.
+ *
+ * This function attempts to remove the item associated with the provided key.
+ * It includes error handling for potential issues during the removal process
+ * and logs messages to the console indicating success or failure.
+ *
+ * Note: While this function uses the asynchronous `chrome.storage.local.remove` API,
+ * it is not marked as `async` because `chrome.storage.local.remove` itself uses
+ * a callback function instead of returning a Promise.
+ *
+ * @param {string} key The key of the item to be removed from local storage.
+ */
+async function removeChromeLocalStorageItem(key) {
+  try {
+    chrome.storage.local.remove(key, function() {
+      if (chrome.runtime.lastError) {
+        console.error("Error removing item from local storage:", chrome.runtime.lastError);
+      } else {
+        console.log(`LOG - Item with key "${key}" removed from local storage.`);
+      }
+    });
+  } catch (error) {
+    console.error("An unexpected error occurred while trying to remove from local storage:", error);
+  }
+}
+
+/**
  * Stores data in Chrome's local storage.
  *
  * This function saves the provided data under the specified key in Chrome's local storage.
