@@ -131,17 +131,25 @@ async function setSiteObjData(siteDataObj) {
 // ADD_TO_FRONT_END_END
 
 /**
- * Updates stored data for a given URL.
+ * Manages the tracking session for the currently active URL.
  *
- * This asynchronous function updates the stored data in Chrome's local storage for a given URL.
- * It retrieves the existing data, updates it, and then stores the updated data back.
+ * This asynchronous function retrieves the stored website tracking data,
+ * ends the current session (if one exists), and potentially starts a new
+ * tracking session for the provided `newActiveUrl`. It then saves the
+ * updated tracking data back to Chrome's local storage.
  *
- * @param {string} newActiveUrl - The URL to update data for.
- * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
- * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
+ * @async
+ * @function updateActiveUrlSession
+ * @param {string} newActiveUrl - The URL of the currently active tab. If 
+ *      empty, it signifies no active URL.
+ * @param {boolean} [stopTracking=false] - A boolean indicating whether to 
+ *      explicitly end the current tracking session without starting a new 
+ *      one. This is typically used when the browser loses focus or no tab 
+ *      is active.
+ * @returns {Promise<void>} A Promise that resolves when the tracking session 
+ *      has been updated and the data has been successfully stored.
  */
-// TODO: change name to update activeUrlSession?
-async function updateStoredData(newActiveUrl, stopTracking) {
+async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     let siteDataObj = await getSiteObjData();
 
     if (!(siteDataObj instanceof UrlDataObj)) {
@@ -171,7 +179,7 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
-        updateStoredData(activeUrl, false);
+        updateActiveUrlSession(activeUrl, false);
         console.log("LOG - URL changed: " + activeUrl); // DEBUG:
     }
 });
@@ -187,7 +195,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
-        updateStoredData(activeUrl, false);
+        updateActiveUrlSession(activeUrl, false);
         console.log("LOG - Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
@@ -196,7 +204,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         console.log("LOG - All Chrome windows are now unfocused.");
-        updateStoredData("", true);
+        updateActiveUrlSession("", true);
 
     } else {
         console.log(`LOG - Chrome window with ID ${windowId} is now focused.`);
@@ -208,7 +216,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                 const activeUrl = cleanUrl(activeTab.url);
 
                 console.log("LOG - Active Tab URL on focus:", activeUrl);
-                updateStoredData(activeUrl, false); // Start tracking the newly active URL
+                updateActiveUrlSession(activeUrl, false); // Start tracking the newly active URL
             } else {
                 console.log("LOG - No active tab found in the newly focused window.");
             }
