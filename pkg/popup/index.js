@@ -22,34 +22,34 @@ class UrlDataObj {
     }
 
     /**
-    * Sets the currently active URL being tracked and updates the tracking start time.
-    *
-    * @param {string} url - The URL to set as the currently active one.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time for this active URL. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
-    */
+     * Appends a new URL to the tracking list if it doesn't already exist.
+     * If the URL is new, it's added to the list with an initial total tracking time of 0.
+     *
+     * @param {string} url - The URL to add to the tracking list.
+     * @returns {boolean} - True if the URL was successfully appended (it was new),
+     *      false otherwise (the URL already existed in the list).
+     */
     appendListItem(url) {
         if (!this.urlList.some(item => item.url === url)) {
             this.urlList.push( { url: url, totalTime: 0 } );
-            return true; // Indicate that a new item was appended
+            return true; // new item was appended
         }
-        return false; // Indicate that the item already existed
+        return false; // item already existed
     }
 
     /**
     * Starts a new tracking session for a given URL.
-    * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    * provided 'currentTime' (or the current timestamp if not provided).
-    * Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    * truthy when attempting to start a new session.
+    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+    *   provided 'currentTime' (or the current timestamp if not provided).
+    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
+    *   truthy when attempting to start a new session.
     *
     * @param {string} url - The URL to set as the currently active one to start tracking.
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   starting time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     * @returns {boolean} - True if the session was started successfully, false otherwise
-    * (e.g., if a session was already active).
+    *   (e.g., if a session was already active).
     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
@@ -68,15 +68,15 @@ class UrlDataObj {
 
     /**
     * Ends the currently active tracking session and records the elapsed time.
-    * It finds the active URL in the urlList, calculates the time elapsed since
-    * the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    * and resets the 'startDate' and 'isActive' properties of that item.
-    * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    * Logs an error if no active item is found.
+    *   It finds the active URL in the urlList, calculates the time elapsed since
+    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
+    *   and resets the 'startDate' and 'isActive' properties of that item.
+    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+    *   Logs an error if no active item is found.
     *
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * ending time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   ending time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
         console.log(`LOG - Tracking exits for ${this.activeUrl}`)
@@ -172,12 +172,18 @@ class UrlDataObj {
     */
     calcTimeElapsed(startDate, endDate) {
 
-        // TODO: the line below this might be better then the current one
-        //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
-        if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+        // check if startDate is valid
+        if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
             console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
             console.trace();
-            return null; // Or throw error
+            return null;
+        }
+
+        // check if endDate is valid
+        if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+            console.error("TypeError: Parameter 'endDate' in calcTimeElapsed() must be a Date object.", endDate);
+            console.trace();
+            return null;
         }
 
         return endDate - startDate;
@@ -257,6 +263,8 @@ function getUrlListAsTable(urlList) {
 }
 
 
+const SITE_DATA_KEY = "siteData"; // Define as a constant
+
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -264,33 +272,86 @@ function getUrlListAsTable(urlList) {
 // ==================================================== \\
 
 /**
- * Stores data in Chrome's local storage.
+ * Asynchronously removes a single item from the Chrome extension's local storage.
  *
- * This function saves the provided data under the specified key in Chrome's local storage.
- * It handles potential errors during the storage process and logs the outcome.
+ * This function attempts to remove the item associated with the provided key.
+ *  It wraps the callback-based `chrome.storage.local.remove` API in a Promise
+ *  for easier asynchronous handling. The Promise resolves upon successful
+ *  removal and rejects if an error occurs. The function also logs messages
+ *  to the console indicating success or failure.
  *
- * @param {string} key - The key under which to store the data.
- * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
+ * @async
+ * @function removeChromeLocalStorageItem
+ * @param {string} key The key of the item to be removed from local storage.
+ * @returns {Promise<void>} A Promise that resolves when the item is successfully
+ *      removed, or rejects if an error occurs.
  */
-async function storeChromeLocalData(key, data) {
-    chrome.storage.local.set({ [key]: data}, function() {
-        if (chrome.runtime.lastError) {
-            console.error('Error saving to local storage:', chrome.runtime.lastError);
-        } else {
-            console.log(`LOG - Stored: key: ${key}`);
-            //console.log(`LOG - Stored: key: ${key}, value: ${data}`);
-        }
+function removeChromeLocalStorageItem(key) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.remove(key, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Error removing item from local storage:", chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+            } else {
+                console.log(`LOG - Item with key "${key}" removed from local storage.`);
+                resolve();
+            }
+        });
     });
+}
+
+/**
+ * Asynchronously stores data in Chrome's local storage.
+ *
+ * This function saves the provided data under the specified key in Chrome's
+ *  local storage, returning a Promise that resolves upon successful storage
+ *  or rejects if an error occurs. It also logs the outcome of the storage
+ *  operation to the console.
+ *
+ * @async
+ * @function storeChromeLocalData
+ * @param {string} key - The key under which to store the data.
+ * @param {any} data - The data to be stored. This can be any JavaScript
+ *      object that is serializable.
+ * @returns {Promise<void>} A Promise that resolves when the data is
+ *      successfully stored, or rejects if an error occurs.
+ */
+function storeChromeLocalData(key, data) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({ [key]: data}, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Error saving to local storage:', chrome.runtime.lastError);
+                reject(chrome.runtime.lastError); // Indicate failure with the error
+            } else {
+                console.log(`LOG - Stored: key: ${key}`);
+                resolve(); // Indicate successful completion
+            }
+        });
+    });
+}
+
+/**
+ * Stores site data to Chrome local storage.
+ *
+ * @async
+ * @function setSiteObjData
+ * @param {any} siteDataObj - The site data object to store.
+ * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
+ */
+async function setSiteObjData(siteDataObj) {
+    const siteDataString = siteDataObj.toJSONString();
+    storeChromeLocalData(SITE_DATA_KEY, siteDataString);
 }
 
 /**
  * Retrieves data from Chrome's local storage.
  *
  * This asynchronous function retrieves data from Chrome's local storage using the provided key.
- * It handles potential errors during retrieval and returns the data or undefined if an error occurs.
+ *  It handles potential errors during retrieval and returns the data or undefined if an error occurs.
  *
  * @param {string} key - The key of the data to retrieve.
- * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved data, or undefined if an error occurred.
+ * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved
+ *      data, or undefined if an error occurred.
  */
 async function getChromeLocalData(key) {
     try {
@@ -301,21 +362,20 @@ async function getChromeLocalData(key) {
 
     } catch (error) {
         console.error("Error retrieving data:", error);
-        return undefined;
+        return null;
     }
 }
 
 /**
  * Retrieves site data from Chrome local storage.  If no data exists,
- * it creates a new tracking object.
+ *  it creates a new tracking object.
  *
  * @async
  * @function getSiteObjData
  * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
-    let key = "siteData";
-    let siteDataString = await getChromeLocalData(key);
+    let siteDataString = await getChromeLocalData(SITE_DATA_KEY);
 
     let siteDataObj = new UrlDataObj();
 
@@ -329,20 +389,6 @@ async function getSiteObjData() {
         console.error( "Error: siteData is not instance of UrlDataObj - in getSiteObjData()",);
     }
     return siteDataObj;
-}
-
-/**
- * Stores site data to Chrome local storage.
- *
- * @async
- * @function setSiteObjData
- * @param {any} siteDataObj - The site data object to store.
- * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
- */
-async function setSiteObjData(siteDataObj) {
-    let key = "siteData";
-    const siteDataString = siteDataObj.toJSONString();
-    storeChromeLocalData(key, siteDataString);
 }
 
 
