@@ -14,8 +14,12 @@
 // TODO: NEXT
 // TODO: clean up css
 // TODO: show top 10 and allow exspand / scroll
-// TODO: add day by day tracking
-
+// TODO: when opening report the data for current tab time session not show for the current page until you leave it
+//
+// AFTER LAUNCH?
+// TODO: clean up old data (Date based)
+// TODO: build lockOut ui page
+// TODO: build DoNotTrack ui page
 
 //  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
 //  TODO: - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
@@ -86,5 +90,32 @@ async function dispayUrlData() {
 }
 
 dispayUrlData();
+
+// ===================================================== \\
+// ===================================================== \\
+//                      Nav Script
+// ===================================================== \\
+// ===================================================== \\
+
+const timeSpentLink = document.getElementById('timeSpentLink');
+const doNotTrackLink = document.getElementById('doNotTrackLink');
+const lockOutLink = document.getElementById('lockOutLink');
+
+timeSpentLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    dispayUrlData();
+})
+
+doNotTrackLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    // TODO: build page
+    setHtmlById('content-div', "Work In Progress");
+})
+
+lockOutLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    // TODO: build page
+    setHtmlById('content-div', "Work In Progress");
+})
 
 // END_IMPORT_HERE

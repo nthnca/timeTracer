@@ -467,3 +467,28 @@ async function dispayUrlData() {
 
 dispayUrlData();
 
+// ===================================================== \\
+// ===================================================== \\
+//                      Nav Script
+// ===================================================== \\
+// ===================================================== \\
+
+const timeSpentLink = document.getElementById('timeSpentLink');
+const doNotTrackLink = document.getElementById('doNotTrackLink');
+const lockOutLink = document.getElementById('lockOutLink');
+
+timeSpentLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    dispayUrlData();
+})
+
+doNotTrackLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    setHtmlById('content-div', "Work In Progress");
+})
+
+lockOutLink.addEventListener('click', function(event) {
+    event.preventDefault()
+    setHtmlById('content-div', "Work In Progress");
+})
+
