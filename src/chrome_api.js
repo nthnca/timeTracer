@@ -13,8 +13,6 @@
 
 // ADD_TO_FRONT_END_START
 
-const SITE_DATA_KEY = "siteData"; // Define as a constant
-
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -90,7 +88,7 @@ function storeChromeLocalData(key, data) {
  */
 async function setSiteObjData(siteDataObj) {
     const siteDataString = siteDataObj.toJSONString();
-    storeChromeLocalData(SITE_DATA_KEY, siteDataString);
+    storeChromeLocalData(getDateKey(), siteDataString);
 }
 
 /**
@@ -125,7 +123,7 @@ async function getChromeLocalData(key) {
  * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
-    let siteDataString = await getChromeLocalData(SITE_DATA_KEY);
+    let siteDataString = await getChromeLocalData(getDateKey());
 
     let siteDataObj = new UrlDataObj();
 

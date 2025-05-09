@@ -86,9 +86,30 @@ function cleanUrl(url) {
         return null;
     }
 }
-// END_IMPORT_HERE
 
 // ADD_TO_FRONT_END_START
+
+/**
+ * Formats a Date object into a 'yyyy-mm-dd' string.
+ * If no Date object is provided, the current date will be used.
+ *
+ * @param {Date} [dateKey=new Date()] - The Date object to format. Defaults to the current date.
+ * @returns {string} The date formatted as 'yyyy-mm-dd'.
+ *
+ * @example
+ * const todayKey = getDateKey(); // Returns the current date in 'yyyy-mm-dd' format (e.g., '2025-05-09')
+ * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
+ */
+function getDateKey(dateKey = new Date()) {
+    const year = dateKey.getFullYear();
+    const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const day = String(dateKey.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+// END_IMPORT_HERE
+
 
 // ===================================================== \\
 // ===================================================== \\
@@ -227,6 +248,10 @@ function runAllTests() {
     passRate += testFormatMillisecsToHoursAndMinutes_invalidNull();
     passRate += testFormatMillisecsToHoursAndMinutes_negativeInput();
     testCount += 6;
+
+    passRate += testGetDateKey_specificDate();
+    passRate += testGetDateKey_singleDigitMonthAndDay();
+    testCount += 2;
 
     console.log(`Utils - Total Pass Rate ------------------------- ${passRate}/${testCount} `)
 }
@@ -439,9 +464,12 @@ function testFormatMillisecsToHoursAndMinutes_exactHour() {
 }
 
 function testFormatMillisecsToHoursAndMinutes_onlyMinutes() {
+    // setup
     const testData = 1800000; // 30 minutes
     const expectedOutput = "30 min";
+    // exercise
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    // check / test
     if (actualOutput === expectedOutput) {
         return 1;
     } else {
@@ -453,9 +481,12 @@ function testFormatMillisecsToHoursAndMinutes_onlyMinutes() {
 }
 
 function testFormatMillisecsToHoursAndMinutes_hoursAndMinutes() {
+    // setup
     const testData = 7500000; // 2 hours and 5 minutes
     const expectedOutput = "2 hr, 5 min";
+    // exercise
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    // check / test
     if (actualOutput === expectedOutput) {
         return 1;
     } else {
@@ -467,9 +498,12 @@ function testFormatMillisecsToHoursAndMinutes_hoursAndMinutes() {
 }
 
 function testFormatMillisecsToHoursAndMinutes_zeroMilliseconds() {
+    // setup
     const testData = 0;
     const expectedOutput = "0 min";
+    // exercise
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    // check / test
     if (actualOutput === expectedOutput) {
         return 1;
     } else {
@@ -481,9 +515,12 @@ function testFormatMillisecsToHoursAndMinutes_zeroMilliseconds() {
 }
 
 function testFormatMillisecsToHoursAndMinutes_invalidNull() {
+    // setup
     const testData = null;
     const expectedOutput = "0 min";
+    // exercise
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    // check / test
     if (actualOutput === expectedOutput) {
         return 1;
     } else {
@@ -495,13 +532,54 @@ function testFormatMillisecsToHoursAndMinutes_invalidNull() {
 }
 
 function testFormatMillisecsToHoursAndMinutes_negativeInput() {
+    // setup
     const testData = -1000;
     const expectedOutput = "0 min";
+    // exercise
     const actualOutput = formatMillisecsToHoursAndMinutes(testData);
+    // check / test
     if (actualOutput === expectedOutput) {
         return 1;
     } else {
         console.log(`formatMillisecsToHoursAndMinutes (negative) --------- ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testGetDateKey_specificDate() {
+    // setup
+    const testDate = new Date(2023, 10, 15); // November 15, 2023 (month is 0-indexed)
+    const expectedOutput = "2023-11-15";
+
+    // exercise
+    const actualOutput = getDateKey(testDate);
+
+    // check / test
+    if (actualOutput === expectedOutput) {
+        return 1;
+    } else {
+        console.log(`getDateKey (specific date) ------------------ ❗`);
+        console.log(`Expected: "${expectedOutput}"`);
+        console.log(`Actual:   "${actualOutput}"`);
+        return 0;
+    }
+}
+
+function testGetDateKey_singleDigitMonthAndDay() {
+    // setup
+    const testDate = new Date(2024, 5, 9); // June 9, 2024
+    const expectedOutput = "2024-06-09";
+
+    // exercise
+    const actualOutput = getDateKey(testDate);
+
+    // check / test
+    if (actualOutput === expectedOutput) {
+        return 1;
+    } else {
+        console.log(`getDateKey (single digit month/day) -------- ❗`);
         console.log(`Expected: "${expectedOutput}"`);
         console.log(`Actual:   "${actualOutput}"`);
         return 0;

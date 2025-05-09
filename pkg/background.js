@@ -267,6 +267,26 @@ function cleanUrl(url) {
 }
 
 /**
+ * Formats a Date object into a 'yyyy-mm-dd' string.
+ * If no Date object is provided, the current date will be used.
+ *
+ * @param {Date} [dateKey=new Date()] - The Date object to format. Defaults to the current date.
+ * @returns {string} The date formatted as 'yyyy-mm-dd'.
+ *
+ * @example
+ * const todayKey = getDateKey(); // Returns the current date in 'yyyy-mm-dd' format (e.g., '2025-05-09')
+ * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
+ */
+function getDateKey(dateKey = new Date()) {
+    const year = dateKey.getFullYear();
+    const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const day = String(dateKey.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+
+/**
  * @fileoverview This script contains functions that interact with the Chrome
  *  extension APIs for managing and retrieving website tracking data from
  *  local storage. It also sets up event listeners to track URL changes,
@@ -277,8 +297,6 @@ function cleanUrl(url) {
  * @author: Calvin Bullock
  * @date Date of creation: April, 2025
  */
-
-const SITE_DATA_KEY = "siteData"; // Define as a constant
 
 // ==================================================== \\
 // ==================================================== \\
@@ -355,7 +373,7 @@ function storeChromeLocalData(key, data) {
  */
 async function setSiteObjData(siteDataObj) {
     const siteDataString = siteDataObj.toJSONString();
-    storeChromeLocalData(SITE_DATA_KEY, siteDataString);
+    storeChromeLocalData(getDateKey(), siteDataString);
 }
 
 /**
@@ -390,7 +408,7 @@ async function getChromeLocalData(key) {
  * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
-    let siteDataString = await getChromeLocalData(SITE_DATA_KEY);
+    let siteDataString = await getChromeLocalData(getDateKey());
 
     let siteDataObj = new UrlDataObj();
 
