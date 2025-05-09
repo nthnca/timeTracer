@@ -201,7 +201,7 @@ function unmuteConsole() {
 // ===================================================== \\
 // ===================================================== \\
 
-async function runAllTests() {
+function runAllTests() {
     let testCount = 0;
     let passRate = 0;
 
