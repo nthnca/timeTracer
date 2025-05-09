@@ -485,6 +485,51 @@ function calcTimeElapsed_hours() {
     }
 }
 
+// Test case 1: Check if calcTimeElapsed handles an invalid startDate correctly
+function test_calcTimeElapsed_invalidStartDate() {
+    // setup
+    const trackerObj = new UrlDataObj();
+    const invalidStartDate = "not a date";
+    const endDate = new Date();
+
+    // exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(invalidStartDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    if (time === null) {
+        return 1;
+    } else {
+        console.log(`test_calcTimeElapsed_invalidStartDate --------------- ❗ `);
+        console.log("Returned time:", time);
+        return 0;
+    }
+}
+
+// Test case 2: Check if calcTimeElapsed handles an invalid endDate correctly
+function test_calcTimeElapsed_invalidEndDate() {
+    // setup
+    const trackerObj = new UrlDataObj();
+    const startDate = new Date();
+    const invalidEndDate = "also not a date";
+
+    // exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(startDate, invalidEndDate);
+    unmuteConsole();
+
+    // check / test
+    if (time === null) {
+        return 1;
+    } else {
+        console.log(`test_calcTimeElapsed_invalidEndDate ----------------- ❗ `);
+        console.log("Returned time:", time);
+        return 0;
+    }
+}
+
+
 // Calc time Elapsed tests
 //      test if startDate is a date obj
 //      if not trough err
