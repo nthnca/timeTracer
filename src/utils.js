@@ -165,7 +165,7 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
  */
 function getUrlListAsTable(urlList) {
     let display = "<table>";
-    display += "<thead><tr><th>#</th><th>Site Name</th><th>Time Spent</th></tr></thead>";
+    display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
     display += "<tbody>";
 
     for (let i = 0; i < urlList.length; i++) {
@@ -411,7 +411,7 @@ function testGetUrlListDisplay_basic() {
             <tr>
               <th>#</th>
               <th>Site Name</th>
-              <th>Time Spent</th>
+              <th>Time</th>
             </tr>
           </thead>
           <tbody>

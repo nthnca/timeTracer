@@ -100,22 +100,41 @@ dispayUrlData();
 const timeSpentLink = document.getElementById('timeSpentLink');
 const doNotTrackLink = document.getElementById('doNotTrackLink');
 const lockOutLink = document.getElementById('lockOutLink');
+const menuLinks = document.querySelectorAll('.menu-link');
+
+// Function to remove 'active' from all menu links
+function removeActiveClassFromAll() {
+  menuLinks.forEach(link => link.classList.remove('active'));
+}
 
 timeSpentLink.addEventListener('click', function(event) {
     event.preventDefault()
     dispayUrlData();
+
+    // set active link item
+    removeActiveClassFromAll();
+    this.classList.add('active');
+
 })
 
 doNotTrackLink.addEventListener('click', function(event) {
     event.preventDefault()
     // TODO: build page
     setHtmlById('content-div', "Work In Progress");
+
+    // set active link item
+    removeActiveClassFromAll();
+    this.classList.add('active');
 })
 
 lockOutLink.addEventListener('click', function(event) {
     event.preventDefault()
     // TODO: build page
     setHtmlById('content-div', "Work In Progress");
+
+    // set active link item
+    removeActiveClassFromAll();
+    this.classList.add('active');
 })
 
 // END_IMPORT_HERE
