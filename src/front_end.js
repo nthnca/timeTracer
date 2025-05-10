@@ -15,11 +15,13 @@
 // TODO: clean up css
 // TODO: show top 10 and allow exspand / scroll
 // TODO: when opening report the data for current tab time session not show for the current page until you leave it
+// TODO: make the UI window wider / remove the count from the table
 //
 // AFTER LAUNCH?
 // TODO: clean up old data (Date based)
 // TODO: build lockOut ui page
 // TODO: build DoNotTrack ui page
+// TODO: add a total time count?
 
 //  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
 //  TODO: - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
