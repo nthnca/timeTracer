@@ -1,3 +1,11 @@
+/**
+ * @fileoverview This file contains the implementation and tests for the UrlDataObj
+ * class, which is responsible for tracking and storing the time spent on different
+ * URLs.
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
 
 // BEGIN_IMPORT_HERE
 
@@ -24,46 +32,45 @@ class UrlDataObj {
     }
 
     /**
-    * Sets the currently active URL being tracked and updates the tracking start time.
-    *
-    * @param {string} url - The URL to set as the currently active one.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time for this active URL. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
-    */
+     * Appends a new URL to the tracking list if it doesn't already exist.
+     * If the URL is new, it's added to the list with an initial total tracking time of 0.
+     *
+     * @param {string} url - The URL to add to the tracking list.
+     * @returns {boolean} - True if the URL was successfully appended (it was new),
+     *      false otherwise (the URL already existed in the list).
+     */
     appendListItem(url) {
         if (!this.urlList.some(item => item.url === url)) {
             this.urlList.push( { url: url, totalTime: 0 } );
-            return true; // Indicate that a new item was appended
+            return true; // new item was appended
         }
-        return false; // Indicate that the item already existed
+        return false; // item already existed
     }
 
     /**
     * Starts a new tracking session for a given URL.
-    * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    * provided 'currentTime' (or the current timestamp if not provided).
-    * Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    * truthy when attempting to start a new session.
+    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+    *   provided 'currentTime' (or the current timestamp if not provided).
+    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
+    *   truthy when attempting to start a new session.
     *
     * @param {string} url - The URL to set as the currently active one to start tracking.
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   starting time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     * @returns {boolean} - True if the session was started successfully, false otherwise
-    * (e.g., if a session was already active).
+    *   (e.g., if a session was already active).
     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
-            // TODO: write a test for this path
             console.error("Error: startTime / activeUrl should never be true on enter ",
                 "old startTime: ", this.startTime,
                 "old activeUrl: ", this.activeUrl,
                 "new startTime: ", currentTime,
                 "new activeUrl: ", url
             );
-            return false;
         }
+        console.log(`LOG - Tracking starts for ${url}`)
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -71,27 +78,31 @@ class UrlDataObj {
 
     /**
     * Ends the currently active tracking session and records the elapsed time.
-    * It finds the active URL in the urlList, calculates the time elapsed since
-    * the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    * and resets the 'startDate' and 'isActive' properties of that item.
-    * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    * Logs an error if no active item is found.
+    *   It finds the active URL in the urlList, calculates the time elapsed since
+    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
+    *   and resets the 'startDate' and 'isActive' properties of that item.
+    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+    *   Logs an error if no active item is found.
     *
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * ending time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   ending time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
-            return false;
+            return; // if null nothing to add or update
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
         const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
 
+        // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
 
         } else {
             // TODO: update tests to cover this case
@@ -100,7 +111,9 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             })
+            console.log(`LOG - ${this.activeUrl} added to urlList`)
         }
+
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -169,12 +182,18 @@ class UrlDataObj {
     */
     calcTimeElapsed(startDate, endDate) {
 
-        // TODO: the line below this might be better then the current one
-        //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
-        if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+        // check if startDate is valid
+        if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
             console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
             console.trace();
-            return null; // Or throw error
+            return null;
+        }
+
+        // check if endDate is valid
+        if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+            console.error("TypeError: Parameter 'endDate' in calcTimeElapsed() must be a Date object.", endDate);
+            console.trace();
+            return null;
         }
 
         return endDate - startDate;
@@ -225,38 +244,35 @@ function unmuteConsole() {
 async function runAllTests() {
     let testCount = 0;
     let passRate = 0;
-    console.log("\n\n------ ---- ---- - urlDataObj  - ---- ---- ------")
 
     passRate += test_appendListItem_basic();
     passRate += test_AppendListItem_existing();
     testCount += 2;
-    console.log();
 
     passRate += test_startSession_newSession();
     passRate += test_startSession_existingSession();
     testCount += 2;
-    console.log();
 
     // TODO: add a test to ensure that the totalTime += works right
     // TODO: add a test to ensure that the if item not exists errors right
     passRate += test_endSession_basic();
-    testCount += 1;
-    console.log();
+    passRate += test_endSession_nullActiveUrl();
+    testCount += 2;
 
+    passRate += test_calcTimeElapsed_invalidStartDate();
+    passRate += test_calcTimeElapsed_invalidEndDate();
     passRate += calcTimeElapsed_minutes();
     passRate += calcTimeElapsed_hours();
     passRate += calcTimeElapsed_doubleDate();
     passRate += calcTimeElapsed_doubleDateFix();
-    testCount += 4;
-    console.log()
+    testCount += 6;
 
     passRate += test_toJSON_basic();
     passRate += test_fromJSONString_basic();
     passRate += test_toJSON_fromJSON_integration();
     testCount += 3;
-    console.log()
 
-    console.log(`urlDataObj - Total Pass Rate ---------------- ${passRate}/${testCount} `)
+    console.log(`urlDataObj - Total Pass Rate -------------------- ${passRate}/${testCount} `)
 }
 
 runAllTests();
@@ -289,10 +305,9 @@ function test_appendListItem_basic() {
         && itemUrl == urlToAppend
         && itemTime == 0
     ) {
-        console.log(`test_appendListItem_basic ------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_appendListItem_basic ------------------- ❗ `);
+        console.log(`test_appendListItem_basic --------------------------- ❗ `);
         return 0;
     }
 }
@@ -313,10 +328,9 @@ function test_AppendListItem_existing() {
     const finalLength = trackerObj.urlList.length;
 
     if ( result === false && finalLength === initialLength ) {
-        console.log(`test_AppendListItem_existing ---------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_AppendListItem_existing ---------------- ❗ `);
+        console.log(`test_AppendListItem_existing ------------------------ ❗ `);
         return 0;
     }
 }
@@ -329,7 +343,9 @@ function test_startSession_newSession() {
     const testTime = new Date(2024, 0, 7, 10, 0, 0, 0); // Example: January 7, 2024, 10:00 AM
 
     // exercise
+    muteConsole();
     trackerObj.startSession(testUrl, testTime);
+    unmuteConsole();
 
     // check / test
     const newStartTime = trackerObj.startTime;
@@ -338,10 +354,9 @@ function test_startSession_newSession() {
     if (newStartTime === testTime
         && newActiveUrl === testUrl
     ) {
-        console.log(`test_startSession_newSession ---------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_startSession_newSession ---------------- ❗ `);
+        console.log(`test_startSession_newSession ------------------------ ❗ `);
         console.log("newStartTime === testTime:", newStartTime === testTime, newStartTime);
         console.log("newActiveUrl === testUrl: ", newActiveUrl === testUrl, newActiveUrl);
         return 0;
@@ -366,10 +381,9 @@ function test_startSession_existingSession() {
     // check / test
 
     if (!result) { // did we error
-        console.log(`test_startSession_existingSession ----------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_startSession_existingSession ----------- ❗ `);
+        console.log(`test_startSession_existingSession ------------------- ❗ `);
         return 0;
     }
 }
@@ -390,7 +404,9 @@ function test_endSession_basic() {
     const expectedElapsedTime = (endTime - trackerObj.startTime) + 4; // in milli sec
 
     // Exercise
+    muteConsole();
     trackerObj.endSession(endTime);
+    unmuteConsole();
 
     // Check / Test
     const endedSessionUrl = trackerObj.activeUrl;
@@ -404,15 +420,35 @@ function test_endSession_basic() {
         targetItem.totalTime === expectedElapsedTime &&
         trackerObj.startTime === null
     ) {
-        console.log(`test_endSession_basic ----------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`test_endSession_basic ----------------------- ❗ `);
+        console.log(`test_endSession_basic ------------------------------- ❗ `);
         console.log("endedSessionUrl:       ", endedSessionUrl === null);
         console.log("endedSessionStartTime: ", endedSessionStartTime === null);
         console.log("targetItem:            ", !!targetItem);
         console.log("targetItem.totalTime:  ", targetItem.totalTime === expectedElapsedTime);
         console.log("targetItem.startDate   ", trackerObj.startTime === null);
+        return 0;
+    }
+}
+
+function test_endSession_nullActiveUrl() {
+    // Setup
+    const trackerObj = new UrlDataObj();
+
+    // Exercise
+    muteConsole();
+    trackerObj.endSession();
+    unmuteConsole();
+
+    // Check / Test
+    if (trackerObj.urlList.length === 0 && trackerObj.activeUrl === null && trackerObj.startTime === null) {
+        return 1;
+    } else {
+        console.log(`test_endSession_nullActiveUrl ----------------------- ❗ `);
+        console.log("urlList.length:", trackerObj.urlList.length);
+        console.log("activeUrl:", trackerObj.activeUrl);
+        console.log("startTime:", trackerObj.startTime);
         return 0;
     }
 }
@@ -429,10 +465,9 @@ function calcTimeElapsed_minutes() {
 
     // check / test
     if (time == 600000) {
-        console.log(`calcTimeElapsed_minutes --------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_minutes --------------------- ❗ `);
+        console.log(`calcTimeElapsed_minutes ----------------------------- ❗ `);
         return 0;
     }
 }
@@ -450,14 +485,58 @@ function calcTimeElapsed_hours() {
     // check / test
     // 1 hour = 60 minutes * 60 seconds/minute * 1000 milliseconds/second = 3,600,000
     if (time == 3600000) {
-        console.log(`calcTimeElapsed_hours ----------------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_hours ----------------------- ❗ `);
+        console.log(`calcTimeElapsed_hours ------------------------------- ❗ `);
         console.log(time);
         return 0;
     }
 }
+
+// Test case 1: Check if calcTimeElapsed handles an invalid startDate correctly
+function test_calcTimeElapsed_invalidStartDate() {
+    // setup
+    const trackerObj = new UrlDataObj();
+    const invalidStartDate = "not a date";
+    const endDate = new Date();
+
+    // exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(invalidStartDate, endDate);
+    unmuteConsole();
+
+    // check / test
+    if (time === null) {
+        return 1;
+    } else {
+        console.log(`test_calcTimeElapsed_invalidStartDate --------------- ❗ `);
+        console.log("Returned time:", time);
+        return 0;
+    }
+}
+
+// Test case 2: Check if calcTimeElapsed handles an invalid endDate correctly
+function test_calcTimeElapsed_invalidEndDate() {
+    // setup
+    const trackerObj = new UrlDataObj();
+    const startDate = new Date();
+    const invalidEndDate = "also not a date";
+
+    // exercise
+    muteConsole();
+    const time = trackerObj.calcTimeElapsed(startDate, invalidEndDate);
+    unmuteConsole();
+
+    // check / test
+    if (time === null) {
+        return 1;
+    } else {
+        console.log(`test_calcTimeElapsed_invalidEndDate ----------------- ❗ `);
+        console.log("Returned time:", time);
+        return 0;
+    }
+}
+
 
 // Calc time Elapsed tests
 //      test if startDate is a date obj
@@ -476,10 +555,9 @@ function calcTimeElapsed_doubleDate() {
     // check / test
     // error and return null
     if (time == null) {
-        console.log(`calcTimeElapsed_doubleDate ------------------ ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_doubleDate------------------- ❗ `);
+        console.log(`calcTimeElapsed_doubleDate--------------------------- ❗ `);
         console.log(time);
         return 0;
     }
@@ -504,10 +582,9 @@ function calcTimeElapsed_doubleDateFix() {
 
     // check / test
     if (time == 0) {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ✔️ `);
         return 1;
     } else {
-        console.log(`calcTimeElapsed_doubleDateFix --------------- ❗ `);
+        console.log(`calcTimeElapsed_doubleDateFix ----------------------- ❗ `);
         console.log(time);
         return 0;
     }
@@ -541,10 +618,9 @@ function test_toJSON_basic() {
     });
 
     if (jsonOutput === expectedOutput) { // Direct string comparison
-        console.log(`test_toJSON_basic --------------------------- ✔️ `);
         return true;
     } else {
-        console.log(`test_toJSON_basic --------------------------- ❗ `);
+        console.log(`test_toJSON_basic ----------------------------------- ❗ `);
         console.log("Expected Output:", expectedOutput);
         console.log("Actual Output:", jsonOutput);
         return false;
@@ -584,10 +660,9 @@ function test_fromJSONString_basic() {
     const urlListMatch = JSON.stringify(trackerObj.urlList) === JSON.stringify(expectedTrackerObj.urlList);
 
     if (activeUrlMatch && startTimeMatch && urlListMatch) {
-        console.log(`test_fromJSONString_basic ------------------- ✔️ `);
         return true;
     } else {
-        console.log(`test_fromJSONString_basic ------------------- ❗ `);
+        console.log(`test_fromJSONString_basic --------------------------- ❗ `);
         console.log("Expected Output:", expectedTrackerObj);
         console.log("Actual Output:", trackerObj);
         return false;
@@ -620,10 +695,9 @@ function test_toJSON_fromJSON_integration() {
     const urlListMatch = JSON.stringify(reconstructedTrackerObj.urlList) === JSON.stringify(originalTrackerObj.urlList);
 
     if (activeUrlMatch && startTimeMatch && urlListMatch) {
-        console.log(`test_toJSON_fromJSON_integration ------------ ✔️ `);
         return true;
     } else {
-        console.log(`test_toJSON_fromJSON_integration ------------ ❗ `);
+        console.log(`test_toJSON_fromJSON_integration -------------------- ❗ `);
         console.log("Original Object:", originalTrackerObj);
         console.log("Reconstructed Object:", reconstructedTrackerObj);
         return false;

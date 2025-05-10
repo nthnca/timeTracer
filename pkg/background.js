@@ -22,46 +22,45 @@ class UrlDataObj {
     }
 
     /**
-    * Sets the currently active URL being tracked and updates the tracking start time.
-    *
-    * @param {string} url - The URL to set as the currently active one.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time for this active URL. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
-    */
+     * Appends a new URL to the tracking list if it doesn't already exist.
+     * If the URL is new, it's added to the list with an initial total tracking time of 0.
+     *
+     * @param {string} url - The URL to add to the tracking list.
+     * @returns {boolean} - True if the URL was successfully appended (it was new),
+     *      false otherwise (the URL already existed in the list).
+     */
     appendListItem(url) {
         if (!this.urlList.some(item => item.url === url)) {
             this.urlList.push( { url: url, totalTime: 0 } );
-            return true; // Indicate that a new item was appended
+            return true; // new item was appended
         }
-        return false; // Indicate that the item already existed
+        return false; // item already existed
     }
 
     /**
     * Starts a new tracking session for a given URL.
-    * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    * provided 'currentTime' (or the current timestamp if not provided).
-    * Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    * truthy when attempting to start a new session.
+    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+    *   provided 'currentTime' (or the current timestamp if not provided).
+    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
+    *   truthy when attempting to start a new session.
     *
     * @param {string} url - The URL to set as the currently active one to start tracking.
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * starting time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   starting time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     * @returns {boolean} - True if the session was started successfully, false otherwise
-    * (e.g., if a session was already active).
+    *   (e.g., if a session was already active).
     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
-            // TODO: write a test for this path
             console.error("Error: startTime / activeUrl should never be true on enter ",
                 "old startTime: ", this.startTime,
                 "old activeUrl: ", this.activeUrl,
                 "new startTime: ", currentTime,
                 "new activeUrl: ", url
             );
-            return false;
         }
+        console.log(`LOG - Tracking starts for ${url}`)
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -69,27 +68,31 @@ class UrlDataObj {
 
     /**
     * Ends the currently active tracking session and records the elapsed time.
-    * It finds the active URL in the urlList, calculates the time elapsed since
-    * the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    * and resets the 'startDate' and 'isActive' properties of that item.
-    * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    * Logs an error if no active item is found.
+    *   It finds the active URL in the urlList, calculates the time elapsed since
+    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
+    *   and resets the 'startDate' and 'isActive' properties of that item.
+    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+    *   Logs an error if no active item is found.
     *
     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    * ending time of the session. Defaults to the current timestamp if not provided,
-    * allowing for easier testing.
+    *   ending time of the session. Defaults to the current timestamp if not provided,
+    *   allowing for easier testing.
     */
     endSession(currentTime = new Date()) {
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
-            return false;
+            return; // if null nothing to add or update
         }
 
         const activeItem = this.urlList.find(item => item.url === this.activeUrl);
         const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
 
+        // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
 
         } else {
             // TODO: update tests to cover this case
@@ -98,7 +101,9 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             })
+            console.log(`LOG - ${this.activeUrl} added to urlList`)
         }
+
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -167,12 +172,18 @@ class UrlDataObj {
     */
     calcTimeElapsed(startDate, endDate) {
 
-        // TODO: the line below this might be better then the current one
-        //if (Object.prototype.toString.call(startDate) !== '[object Date]' || isNaN(startDate)) {
-        if (Object.prototype.toString.call(startDate) !== '[object Date]') {
+        // check if startDate is valid
+        if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
             console.error("TypeError: Parameter 'startDate' in calcTimeElapsed() must be a Date object.", startDate);
             console.trace();
-            return null; // Or throw error
+            return null;
+        }
+
+        // check if endDate is valid
+        if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+            console.error("TypeError: Parameter 'endDate' in calcTimeElapsed() must be a Date object.", endDate);
+            console.trace();
+            return null;
         }
 
         return endDate - startDate;
@@ -193,7 +204,8 @@ class UrlDataObj {
  * object to the provided target URL.  It returns the index of the first object where the URLs match.
  *
  * @param {string} targetUrl - The URL to search for.
- * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url' property (string).
+ * @param {Array<{url: string}>} dataList - An array of data objects, each containing a 'url'
+ *      property (string).
  * @returns {number} The index of the object with the matching URL, or -1 if no match is found.
  *
  * @example
@@ -218,11 +230,13 @@ function searchDataUrls(targetUrl, dataList) {
 /**
  * Cleans and simplifies a URL string.
  *
- * This function takes a URL string, removes any path, query parameters, or hash fragments,
- * and optionally removes the "https://" protocol. It returns the cleaned URL origin.
+ * This function takes a URL string, removes any path, query parameters, or
+ *  hash fragments, and optionally removes the "https://" protocol. It returns
+ *  the cleaned URL origin.
  *
  * @param {string} url - The URL string to clean.
- * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or null if the URL is invalid or empty.
+ * @returns {string|null} The cleaned URL origin (e.g., "example.com"), or
+ *      null if the URL is invalid or empty.
  *
  * @example
  * // Returns "example.com"
@@ -253,15 +267,36 @@ function cleanUrl(url) {
 }
 
 /**
- * Calculates the number of minutes from a given number of milliseconds.
+ * Formats a Date object into a 'yyyy-mm-dd' string.
+ * If no Date object is provided, the current date will be used.
  *
- * @param {number} milliseconds - The number of milliseconds.
- * @returns {number} The number of minutes.
+ * @param {Date} [dateKey=new Date()] - The Date object to format. Defaults to the current date.
+ * @returns {string} The date formatted as 'yyyy-mm-dd'.
+ *
+ * @example
+ * const todayKey = getDateKey(); // Returns the current date in 'yyyy-mm-dd' format (e.g., '2025-05-09')
+ * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
  */
-function minutesFromMilliseconds(milliseconds) {
-  return milliseconds / (1000 * 60);
+function getDateKey(dateKey = new Date()) {
+    const year = dateKey.getFullYear();
+    const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const day = String(dateKey.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }
 
+
+/**
+ * @fileoverview This script contains functions that interact with the Chrome
+ *  extension APIs for managing and retrieving website tracking data from
+ *  local storage. It also sets up event listeners to track URL changes,
+ *  active tab changes, and Chrome window focus changes to update the stored data.
+ *
+ * NOTE: all code in this file has no automated tests (this code is not easily tested).
+ *
+ * @author: Calvin Bullock
+ * @date Date of creation: April, 2025
+ */
 
 // ==================================================== \\
 // ==================================================== \\
@@ -270,56 +305,110 @@ function minutesFromMilliseconds(milliseconds) {
 // ==================================================== \\
 
 /**
- * Stores data in Chrome's local storage.
+ * Asynchronously removes a single item from the Chrome extension's local storage.
  *
- * This function saves the provided data under the specified key in Chrome's local storage.
- * It handles potential errors during the storage process and logs the outcome.
+ * This function attempts to remove the item associated with the provided key.
+ *  It wraps the callback-based `chrome.storage.local.remove` API in a Promise
+ *  for easier asynchronous handling. The Promise resolves upon successful
+ *  removal and rejects if an error occurs. The function also logs messages
+ *  to the console indicating success or failure.
  *
- * @param {string} key - The key under which to store the data.
- * @param {any} data - The data to be stored.  This can be any JavaScript object that is serializable.
+ * @async
+ * @function removeChromeLocalStorageItem
+ * @param {string} key The key of the item to be removed from local storage.
+ * @returns {Promise<void>} A Promise that resolves when the item is successfully
+ *      removed, or rejects if an error occurs.
  */
-async function storeChromeLocalData(key, data) {
-    chrome.storage.local.set({ [key]: data}, function() {
-        if (chrome.runtime.lastError) {
-            console.error('Error saving to local storage:', chrome.runtime.lastError);
-        } else {
-            console.log(`Stored - key: ${key}, value: ${data}`);
-        }
+function removeChromeLocalStorageItem(key) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.remove(key, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Error removing item from local storage:", chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+            } else {
+                console.log(`LOG - Item with key "${key}" removed from local storage.`);
+                resolve();
+            }
+        });
     });
+}
+
+/**
+ * Asynchronously stores data in Chrome's local storage.
+ *
+ * This function saves the provided data under the specified key in Chrome's
+ *  local storage, returning a Promise that resolves upon successful storage
+ *  or rejects if an error occurs. It also logs the outcome of the storage
+ *  operation to the console.
+ *
+ * @async
+ * @function storeChromeLocalData
+ * @param {string} key - The key under which to store the data.
+ * @param {any} data - The data to be stored. This can be any JavaScript
+ *      object that is serializable.
+ * @returns {Promise<void>} A Promise that resolves when the data is
+ *      successfully stored, or rejects if an error occurs.
+ */
+function storeChromeLocalData(key, data) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({ [key]: data}, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Error saving to local storage:', chrome.runtime.lastError);
+                reject(chrome.runtime.lastError); // Indicate failure with the error
+            } else {
+                console.log(`LOG - Stored: key: ${key}`);
+                resolve(); // Indicate successful completion
+            }
+        });
+    });
+}
+
+/**
+ * Stores site data to Chrome local storage.
+ *
+ * @async
+ * @function setSiteObjData
+ * @param {any} siteDataObj - The site data object to store.
+ * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
+ */
+async function setSiteObjData(siteDataObj) {
+    const siteDataString = siteDataObj.toJSONString();
+    storeChromeLocalData(getDateKey(), siteDataString);
 }
 
 /**
  * Retrieves data from Chrome's local storage.
  *
  * This asynchronous function retrieves data from Chrome's local storage using the provided key.
- * It handles potential errors during retrieval and returns the data or undefined if an error occurs.
+ *  It handles potential errors during retrieval and returns the data or undefined if an error occurs.
  *
  * @param {string} key - The key of the data to retrieve.
- * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved data, or undefined if an error occurred.
+ * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved
+ *      data, or undefined if an error occurred.
  */
 async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
-        console.log(`retrieve - key: ${key}, value: ${result[key]}`);
+        //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
+        console.log(`LOG - retrieve: key: ${key}`);
         return result[key];
 
     } catch (error) {
         console.error("Error retrieving data:", error);
-        return undefined;
+        return null;
     }
 }
 
 /**
  * Retrieves site data from Chrome local storage.  If no data exists,
- * it creates a new tracking object.
+ *  it creates a new tracking object.
  *
  * @async
  * @function getSiteObjData
  * @returns {Promise<any>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
-    let key = "siteData";
-    let siteDataString = await getChromeLocalData(key);
+    let siteDataString = await getChromeLocalData(getDateKey());
 
     let siteDataObj = new UrlDataObj();
 
@@ -336,31 +425,25 @@ async function getSiteObjData() {
 }
 
 /**
- * Stores site data to Chrome local storage.
+ * Manages the tracking session for the currently active URL.
+ *
+ * This asynchronous function retrieves the stored website tracking data,
+ *  ends the current session (if one exists), and potentially starts a new
+ *  tracking session for the provided `newActiveUrl`. It then saves the
+ *  updated tracking data back to Chrome's local storage.
  *
  * @async
- * @function setSiteObjData
- * @param {any} siteDataObj - The site data object to store.
- * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
+ * @function updateActiveUrlSession
+ * @param {string} newActiveUrl - The URL of the currently active tab. If
+ *      empty, it signifies no active URL.
+ * @param {boolean} [stopTracking=false] - A boolean indicating whether to
+ *      explicitly end the current tracking session without starting a new
+ *      one. This is typically used when the browser loses focus or no tab
+ *      is active.
+ * @returns {Promise<void>} A Promise that resolves when the tracking session
+ *      has been updated and the data has been successfully stored.
  */
-async function setSiteObjData(siteDataObj) {
-    let key = "siteData";
-    const siteDataString = siteDataObj.toJSONString();
-    storeChromeLocalData(key, siteDataString);
-}
-
-/**
- * Updates stored data for a given URL.
- *
- * This asynchronous function updates the stored data in Chrome's local storage for a given URL.
- * It retrieves the existing data, updates it, and then stores the updated data back.
- *
- * @param {string} newActiveUrl - The URL to update data for.
- * @returns {Promise<void>}  A Promise that resolves when the data has been successfully updated.
- * @param {Date} [currentTime=new Date()] - An optional Date object representing the starting time.
- */
-// TODO: change name to update activeUrlSession?
-async function updateStoredData(newActiveUrl, stopTracking) {
+async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     let siteDataObj = await getSiteObjData();
 
     if (!(siteDataObj instanceof UrlDataObj)) {
@@ -390,8 +473,8 @@ chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // get url, then update siteList
         let activeUrl = cleanUrl(changeInfo.url);
-        updateStoredData(activeUrl, false);
-        console.log("URL changed: " + activeUrl); // DEBUG:
+        updateActiveUrlSession(activeUrl, false);
+        console.log("LOG - URL changed: " + activeUrl); // DEBUG:
     }
 });
 
@@ -406,19 +489,19 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
         // get url, then update siteList
         let activeUrl = cleanUrl(tab.url); // get new URL
-        updateStoredData(activeUrl, false);
-        console.log("Active Tab URL: ", activeUrl); // DEBUG:
+        updateActiveUrlSession(activeUrl, false);
+        console.log("LOG - Active Tab URL: ", activeUrl); // DEBUG:
     });
 });
 
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
-        console.log("All Chrome windows are now unfocused.");
-        updateStoredData("", true);
+        console.log("LOG - All Chrome windows are now unfocused.");
+        updateActiveUrlSession("", true);
 
     } else {
-        console.log(`Chrome window with ID ${windowId} is now focused.`);
+        console.log(`LOG - Chrome window with ID ${windowId} is now focused.`);
 
         // When focused, query for the active tab in the currently focused window.
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -426,10 +509,10 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                 const activeTab = tabs[0];
                 const activeUrl = cleanUrl(activeTab.url);
 
-                console.log("Active Tab URL on focus:", activeUrl);
-                updateStoredData(activeUrl, false); // Start tracking the newly active URL
+                console.log("LOG - Active Tab URL on focus:", activeUrl);
+                updateActiveUrlSession(activeUrl, false); // Start tracking the newly active URL
             } else {
-                console.log("No active tab found in the newly focused window.");
+                console.log("LOG - No active tab found in the newly focused window.");
             }
         });
     }

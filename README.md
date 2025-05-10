@@ -11,13 +11,15 @@
     - [ ] save to and from local storage are duplicated.... (background.js, popup/index.js)
 - [ ] add a way to flag URLs to remind people that they don't want to spend more time on that site
 - [ ] create a usr object in local storage to store users settings
+- [ ] should build and run .sh be one file??
 
 ## file layout
-- pkg/      -- The final code to run the extension
-- src/      -- The tests and vanilla .js code, seperated from the chrome API code]
+- pkg/      -- The code in it's production script files
+- src/      -- The source code in its files for testing and building
 - test.sh   -- This will run all the test files / scripts
 - build.sh  -- This will parse all my src files into the production script files
 - watch.sh  --  TODO: this is similar to nodemon, it will watch the src files and rebuild production on change
+- todo.sh   -- a script that will print all TODO: to the console from ./src/*
 
 ## Resources:
 - [Basics of Chrome Extensions](https://www.youtube.com/watch?v=Zt_6UXvoKHM)
