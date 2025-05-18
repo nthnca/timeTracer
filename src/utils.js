@@ -44,7 +44,7 @@ function searchDataUrls(targetUrl, dataList) {
         if (dataList[i].url === targetUrl) {
             return i;
         }
-    };
+    }
     return -1;
 }
 
@@ -193,8 +193,8 @@ function getUrlListAsTable(urlList) {
 // this mute code is from:
 //   https://www.bomberbot.com/javascript/how-to-silence-your-javascript-console-for-cleaner-unit-testing/
 console.original = {
-  log: console.log,
-  info: console.info,
+	log: console.log,
+    info: console.info,
   warn: console.warn,
   error: console.error,
   trace: console.trace
