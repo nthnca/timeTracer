@@ -21,7 +21,8 @@ module.exports = {
     rules: {
         // Example: Disallow the use of console (change 'warn' or 'error' as needed)
         // 'no-console': 'off', // Turn off the rule
-        // 'no-unused-vars': 'warn', // Change a recommended rule to a warning
+        'no-unused-vars': 'warn', // Change a recommended rule to a warning
+        'no-irregular-whitespace': 'warn', // Change a recommended rule to a warning
     },
     // Specify files to ignore (optional, can also use a .eslintignore file)
     ignorePatterns: [
@@ -29,6 +30,7 @@ module.exports = {
        'dist/',
        'build/',
        '__tests__/', 
+       'pkg/', 
        '*.min.js'
     ]
 };
