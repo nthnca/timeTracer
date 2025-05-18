@@ -1,3 +1,6 @@
 {
   "name": "my-project"
+  "scripts": {
+    "lint": "eslint ."
+  }
 }
