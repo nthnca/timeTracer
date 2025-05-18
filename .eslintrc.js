@@ -23,6 +23,7 @@ module.exports = {
         // 'no-console': 'off', // Turn off the rule
         'no-unused-vars': 'warn', // Change a recommended rule to a warning
         'no-irregular-whitespace': 'warn', // Change a recommended rule to a warning
+        'no-undef': 'warn', // Change a recommended rule to a warning
     },
     // Specify files to ignore (optional, can also use a .eslintignore file)
     ignorePatterns: [
