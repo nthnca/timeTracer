@@ -108,6 +108,8 @@ function getDateKey(dateKey = new Date()) {
     return `${year}-${month}-${day}`;
 }
 
+module.exports = getDateKey;
+
 // END_IMPORT_HERE
 
 
